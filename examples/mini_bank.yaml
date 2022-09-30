@@ -1,5 +1,50 @@
 topology:
   services:
+    ads:
+      tagSets:
+        - weight: 1
+          tags:
+            version: 3.7.1
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-10
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: ads-hostname
+      routes:
+        /AdRequest:
+          downstreamCalls:
+          latencyConfigs:
+            - flag_set: ads_bug.slow
+              p0: 30ms
+              p50: 100ms
+              p95: 170ms
+              p99: 200ms
+              p99.9: 300ms
+              p100: 500ms
+            - flag_set: ads_bug.slower
+              p0: 40ms
+              p50: 125ms
+              p95: 200ms
+              p99: 300ms
+              p99.9: 450ms
+              p100: 600ms
+            - p0: 25ms
+              p50: 75ms
+              p95: 100ms
+              p99: 120ms
+              p99.9: 150ms
+              p100: 200ms
+        /Ad:
+          downstreamCalls:
+          maxLatencyMillis: 500
     android:
       resourceAttrSets:
         - weight: 1
@@ -98,6 +143,62 @@ topology:
           maxLatencyMillis: 100
         /logout:
           maxLatencyMillis: 100
+    ext-api-gateway:
+      tagSets:
+        - weight: 1
+          tags:
+            version: 1.0.0
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            pod_count: 10
+            restart:
+              every: 10m
+              jitter: 2m
+            cluster_name: k8s-cluster-23
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-east-1
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-2
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            restart:
+              every: 5m
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+      routes:
+        /ext-api/payment:
+          maxLatencyMillis: 500
+        /paymentAMEX:
+          maxLatencyMillis: 100
+        /paymentMASTERCARD:
+          maxLatencyMillis: 100
+        /paymentVISA:
+          maxLatencyMillis: 100
+        /transferPartner-MorganStanley:
+          maxLatencyMillis: 100
+        /transferSWIFT:
+          maxLatencyMillis: 100
     iOS:
       tagSets:
         - weight: 1
@@ -135,11 +236,72 @@ topology:
           maxLatencyMillis: 100
         /api/submit-payment:
           downstreamCalls:
+            - service: payment
+              route: /CardPayment
             - service: iOS
               route: /api/payment-status
           maxLatencyMillis: 100
         /api/payment-status:
           maxLatencyMillis: 100
+    loan:
+      tagSets:
+        - weight: 1
+          tags:
+            version: 10.4.214
+      routes:
+        /getAgreement:
+          maxLatencyMillis: 100
+        /getScoring:
+          maxLatencyMillis: 100
+        /postLoanInputs:
+          maxLatencyMillis: 100
+        /postScoringInputs:
+          maxLatencyMillis: 100
+    payment:
+      tagSets:
+        - weight: 1
+          tags:
+            version: v177
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: payment-hostname
+      routes:
+        /ChargeRequest:
+          downstreamCalls:
+            - service: payment
+              route: /CreditCardInfo
+          maxLatencyMillis: 700
+        /CreditCardInfo:
+          downstreamCalls:
+          tagSets:
+            - weight: 1
+              tags:
+                card.type: AMEX
+            - weight: 1
+              tags:
+                card.type: VISA
+            - weight: 1
+              tags:
+                card.type: MASTERDCARD
+          maxLatencyMillis: 50
+        /CardPayment:
+          downstreamCalls:
+            - service: payment
+              route: /ChargeRequest
+            - weight: 1
+              service: ext-api-gateway
+              route: /ext-api/payment
+          maxLatencyMillis: 1000
     web:
       tagSets:
         - weight: 1
@@ -247,18 +409,18 @@ flags:
     cron:
       start: "57,12,27,42 * * * *"
       end: "10,25,40,55 * * * *"
-  - name: adservice_bug
+  - name: ads_bug
     cron:
       start: "0,20,40 * * * *"
       end: "10,30,50 * * * *"
-  - name: adservice_bug.slow
+  - name: ads_bug.slow
     incident:
-      parentFlag: adservice_bug
+      parentFlag: ads_bug
       start: 0m, 7m
       duration: 3m
-  - name: adservice_bug.slower
+  - name: ads_bug.slower
     incident:
-      parentFlag: adservice_bug
+      parentFlag: ads_bug
       start: 3m
       duration: 4m
 
@@ -272,9 +434,12 @@ rootRoutes:
   - service: web
     route: /login
     tracesPerHour: 1440
-  - service: api-gateway
-    route: /GetAuthentication
-    tracesPerHour: 1000
+  - service: iOS
+    route: /api/make-payment
+    tracesPerHour: 480
+  - service: android
+    route: /api/make-payment
+    tracesPerHour: 480
 
 config:
   kubernetes:
