@@ -1,0 +1,281 @@
+topology:
+  services:
+    android:
+      resourceAttrSets:
+        - weight: 1
+          resourceAttrs:
+            instrument.name: lightstep
+            http.method: POST
+            client.platform: android
+      metrics:
+        - name: requests
+          type: Sum
+          max: 400
+          min: 0
+          period: 5m
+          shape: triangle
+      routes:
+        /login:
+          downstreamCalls:
+            - service: api-gateway
+              route: /GetAuthentication
+          maxLatencyMillis: 100
+        /api/make-payment:
+          downstreamCalls:
+            - service: android
+              route: /api/submit-payment
+          maxLatencyMillis: 100
+        /api/submit-payment:
+          downstreamCalls:
+            - service: android
+              route: /api/payment-status
+          maxLatencyMillis: 100
+        /api/payment-status:
+          downstreamCalls:
+          maxLatencyMillis: 100
+    api-gateway:
+      tagSets:
+        - weight: 1
+          tags:
+            version: 1.0.0
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            pod_count: 10
+            restart:
+              every: 10m
+              jitter: 2m
+            cluster_name: k8s-cluster-23
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-east-1
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            restart:
+              every: 5m
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+      routes:
+        /GetAuthentication:
+          downstreamCalls:
+            - service: authentication
+              route: /login
+          maxLatencyMillis: 100
+    authentication:
+      tagSets:
+        - weight: 1
+          flag_set: auth_errors
+          tags:
+            version: 3.4.0
+            error: true
+        - weight: 1
+          flag_unset: auth_errors
+          tags:
+            version: 3.3.5
+      routes:
+        /login:
+          maxLatencyMillis: 100
+        /logout:
+          maxLatencyMillis: 100
+    iOS:
+      tagSets:
+        - weight: 1
+          flag_set: iOS_errors
+          tags:
+            version: 5.4.231
+            error: true
+        - weight: 1
+          flag_unset: iOS_errors
+          tags:
+            version: 5.4.231
+      resourceAttrSets:
+        - weight: 1
+          resourceAttrs:
+            instrument.name: lightstep
+            http.method: POST
+            client.platform: iOS
+      metrics:
+        - name: requests
+          type: Sum
+          max: 400
+          min: 0
+          period: 5m
+          shape: triangle
+      routes:
+        /login:
+          downstreamCalls:
+            - service: api-gateway
+              route: /GetAuthentication
+          maxLatencyMillis: 100
+        /api/make-payment:
+          downstreamCalls:
+            - service: iOS
+              route: /api/submit-payment
+          maxLatencyMillis: 100
+        /api/submit-payment:
+          downstreamCalls:
+            - service: iOS
+              route: /api/payment-status
+          maxLatencyMillis: 100
+        /api/payment-status:
+          maxLatencyMillis: 100
+    web:
+      tagSets:
+        - weight: 1
+          tags:
+            version: 1.2.5
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            pod_count: 7
+            restart:
+              every: 10m
+              jitter: 2m
+            cluster_name: k8s-cluster-23
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-east-1
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            restart:
+              every: 5m
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+      routes:
+        /login:
+          downstreamCalls:
+            - service: api-gateway
+              route: /GetAuthentication
+          maxLatencyMillis: 100
+        /api/make-payment:
+          downstreamCalls:
+            - service: web
+              route: /api/submit-payment
+          maxLatencyMillis: 100
+        /api/submit-payment:
+          maxLatencyMillis: 100
+
+flags:
+  # This is a cron-style flag
+  - name: auth_errors
+    # use https://crontab.guru/
+    cron:
+      start: "0,10,20,30,40,50 * * * *"
+      end: "5,15,25,35,45,55 * * * *"
+  - name: iOS_errors
+    # use https://crontab.guru/
+    cron:
+      start: "0,10,20,30,40,50 * * * *"
+      end: "5,15,25,35,45,55 * * * *"
+  - name: runs_on_azure
+  - name: sev0_total_failure
+  - name: database_outage
+  # OOM on currency service + slower span latency from frontend -> currencyservice
+  - name: currencyservice_oom.default
+    incident:
+      parentFlag: currencyservice_fail
+      start: 0m
+      duration: 10m
+  - name: currencyservice_oom.phase_1
+    incident:
+      parentFlag: currencyservice_fail
+      start: 0m
+      duration: 10m
+  - name: currencyservice_oom.phase_2
+    incident:
+      parentFlag: currencyservice_fail
+      start: 3m
+      duration: 7m
+  - name: auth_doom
+    cron:
+      start: "57,12,27,42 * * * *"
+      end: "10,25,40,55 * * * *"
+  # This is an incident-style flag; start and end are relative to incident start
+  - name: auth_doom.phase_1
+    incident:
+      parentFlag: auth_doom
+      start: 0m
+      end: 10m
+  - name: auth_doom.phase_2
+    incident:
+      parentFlag: auth_doom
+      start: 5m
+      # with no duration, lasts until the incident finishes
+  - name: currencyservice_fail
+    cron:
+      start: "57,12,27,42 * * * *"
+      end: "10,25,40,55 * * * *"
+  - name: adservice_bug
+    cron:
+      start: "0,20,40 * * * *"
+      end: "10,30,50 * * * *"
+  - name: adservice_bug.slow
+    incident:
+      parentFlag: adservice_bug
+      start: 0m, 7m
+      duration: 3m
+  - name: adservice_bug.slower
+    incident:
+      parentFlag: adservice_bug
+      start: 3m
+      duration: 4m
+
+rootRoutes:
+  - service: android
+    route: /login
+    tracesPerHour: 2000
+  - service: iOS
+    route: /login
+    tracesPerHour: 2880
+  - service: web
+    route: /login
+    tracesPerHour: 1440
+  - service: api-gateway
+    route: /GetAuthentication
+    tracesPerHour: 1000
+
+config:
+  kubernetes:
+    pod_count: 1
