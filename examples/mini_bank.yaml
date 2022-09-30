@@ -127,6 +127,11 @@ topology:
             - service: authentication
               route: /login
           maxLatencyMillis: 100
+        /getPayment:
+          downstreamCalls:
+            - service: payment
+              route: /CardPayment
+          maxLatencyMillis: 100
     authentication:
       tagSets:
         - weight: 1
@@ -236,8 +241,8 @@ topology:
           maxLatencyMillis: 100
         /api/submit-payment:
           downstreamCalls:
-            - service: payment
-              route: /CardPayment
+            - service: api-gateway
+              route: /getPayment
             - service: iOS
               route: /api/payment-status
           maxLatencyMillis: 100
