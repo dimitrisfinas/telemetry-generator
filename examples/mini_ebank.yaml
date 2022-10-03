@@ -414,6 +414,7 @@ topology:
           downstreamCalls:
             - service: iOS
               route: /submit-payment
+          flag_unset: auth_errors
           maxLatencyMillis: 100
         /submit-payment:
           downstreamCalls:
@@ -421,8 +422,10 @@ topology:
               route: /api/getPayment
             - service: iOS
               route: /payment-status
+          flag_unset: auth_errors
           maxLatencyMillis: 100
         /payment-status:
+          flag_unset: auth_errors
           maxLatencyMillis: 100
     loan:
       tagSets:
