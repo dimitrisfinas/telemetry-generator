@@ -4,9 +4,10 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: 10.3.234
-            region: us-east-1
             account.id: 123456789
+            region: us-east-1
+            transaction.external: true
+            version: 10.3.234
       resourceAttrSets:
         - weight: 1
           kubernetes:
@@ -259,6 +260,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            transaction.external: true
             version: 1.0.0
       resourceAttrSets:
         - weight: 1
@@ -305,7 +307,7 @@ topology:
               tags:
                 transaction.id: LOIN234QDSFFDSG23435
                 transaction.target: ext-api-blacklist
-                transaction.type: external
+                transaction.type: API
           maxLatencyMillis: 500
         /ext-api/checkTransferCompliance:
           tagSets:
@@ -314,7 +316,7 @@ topology:
                 transfer.compliance: approved
                 transfer.id: COMP123456
                 transaction.target: ext-api-NRF
-                transaction.type: external
+                transaction.type: API
           maxLatencyMillis: 500
         /ext-api/payment:
           tagSets:
@@ -322,7 +324,7 @@ topology:
               tags:
                 transfer.id: PAY940535356964
                 transaction.target: ext-api-card
-                transaction.type: external
+                transaction.type: API
           maxLatencyMillis: 300
         /ext-api/transferMoney:
           tagSets:
@@ -330,7 +332,7 @@ topology:
               tags:
                 transfer.id: TRF913234567689884
                 transaction.target: ext-api-trnf
-                transaction.type: external
+                transaction.type: API
           maxLatencyMillis: 300
         /paymentAMEX:
           maxLatencyMillis: 100
@@ -344,7 +346,7 @@ topology:
               tags:
                 transfer.id: TRFDDFQFGFHH1217689884
                 transaction.target: ext-api-morganstanley
-                transaction.type: external
+                transaction.type: API
           maxLatencyMillis: 100
         /transferSWIFT:
           tagSets:
@@ -352,7 +354,7 @@ topology:
               tags:
                 transfer.id: SWFT913234567689884
                 transaction.target: ext-api-swift
-                transaction.type: external
+                transaction.type: API
           maxLatencyMillis: 100
     IAM:
       routes:
@@ -416,7 +418,7 @@ topology:
               tags:
                 customer.blacklist: false
                 transaction.id: LOIN234QDSFFDSG23435
-                transaction.type: external
+                transaction.type: API
           downstreamCalls:
             - service: ext-api-gateway
               route: /ext-api/checkBlacklist
@@ -426,6 +428,7 @@ topology:
             - weight: 1
               tags:
                 ims.transid: LOAG
+                transaction.external: true
                 transaction.id: LOIN234QDSFFDSG23435
                 transaction.region: PRD3
                 transaction.target: MAINFRAME
@@ -436,6 +439,7 @@ topology:
             - weight: 1
               tags:
                 ims.transid: LOST
+                transaction.external: true
                 transaction.id: LOIN234QDSFFDSG23435
                 transaction.region: PRD3
                 transaction.target: MAINFRAME
@@ -446,6 +450,7 @@ topology:
             - weight: 1
               tags:
                 customer.scoring: B
+                transaction.external: true
                 transaction.id: LOIN234QDSFFDSG23435
                 transaction.target: ERP
                 transaction.type: TSO
@@ -466,6 +471,7 @@ topology:
                 loan.amount: 100,000
                 loan.type: household
                 loan.category: ATY
+                transaction.external: true
                 transaction.id: LOIN234QDSFFDSG23435
                 transaction.region: PRD3
                 transaction.target: MAINFRAME
@@ -532,7 +538,7 @@ topology:
           tags:
             version: 5.2
           tagGenerators:
-            - numTags: 25
+            - numTags: 20
               numVals: 3000
               valLength: 16
           inherit:
@@ -666,6 +672,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            transaction.external: true
             version: 3.1.1
       routes:
         /checkCompliance:
@@ -682,8 +689,10 @@ topology:
             - weight: 1
               tags:
                 transfer.destination: BNPP
+                transaction.external: true
                 transaction.id: 456789
-                transaction.type: external
+                transaction.target: ext-api-swift
+                transaction.type: API
           downstreamCalls:
             - service: ext-api-gateway
               route: /ext-api/transferMoney
@@ -704,6 +713,7 @@ topology:
             - tags:
                 cics.transid: TRNI
                 transfer.id: 123456
+                transaction.external: true
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
                 transaction.type: CICS
