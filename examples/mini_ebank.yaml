@@ -34,6 +34,7 @@ topology:
             - weight: 1
               tags:
                 db2.transid: HIST
+                transaction.id: HISTNFDLZ13253KDF23
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
                 transaction.type: DB2
@@ -43,6 +44,7 @@ topology:
             - weight: 1
               tags:
                 cics.transid: ACTB
+                transaction.id: ACTBHSDDS21324536
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
                 transaction.type: CICS
@@ -52,6 +54,7 @@ topology:
             - weight: 1
               tags:
                 cics.transid: INCO
+                transaction.id: INCO203958238328823
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
                 transaction.type: CICS
@@ -239,6 +242,7 @@ topology:
           tags:
             version: 3.4.0
             error: true
+            error.message: "CRITICAL: can't access WSO2 server"
         - weight: 10
           flag_unset: auth_errors
           tags:
@@ -296,14 +300,37 @@ topology:
             cloud.region: us-west-2
       routes:
         /ext-api/checkBlacklist:
+          tagSets:
+            - weight: 1
+              tags:
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.target: ext-api-blacklist
+                transaction.type: external
           maxLatencyMillis: 500
         /ext-api/checkTransferCompliance:
-          tags:
-            transfer.compliance: approved
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.compliance: approved
+                transfer.id: COMP123456
+                transaction.target: ext-api-NRF
+                transaction.type: external
           maxLatencyMillis: 500
         /ext-api/payment:
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.id: PAY940535356964
+                transaction.target: ext-api-card
+                transaction.type: external
           maxLatencyMillis: 300
         /ext-api/transferMoney:
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.id: TRF913234567689884
+                transaction.target: ext-api-trnf
+                transaction.type: external
           maxLatencyMillis: 300
         /paymentAMEX:
           maxLatencyMillis: 100
@@ -312,8 +339,20 @@ topology:
         /paymentVISA:
           maxLatencyMillis: 100
         /transferPartner-MorganStanley:
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.id: TRFDDFQFGFHH1217689884
+                transaction.target: ext-api-morganstanley
+                transaction.type: external
           maxLatencyMillis: 100
         /transferSWIFT:
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.id: SWFT913234567689884
+                transaction.target: ext-api-swift
+                transaction.type: external
           maxLatencyMillis: 100
     IAM:
       routes:
@@ -372,15 +411,44 @@ topology:
             version: 10.4.214
       routes:
         /checkBlacklist:
+          tagSets:
+            - weight: 1
+              tags:
+                customer.blacklist: false
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.type: external
           downstreamCalls:
             - service: ext-api-gateway
               route: /ext-api/checkBlacklist
           maxLatencyMillis: 100
         /getAgreement:
+          tagSets:
+            - weight: 1
+              tags:
+                ims.transid: LOAG
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.region: PRD3
+                transaction.target: MAINFRAME
+                transaction.type: IMS
           maxLatencyMillis: 100
         /getLoanStatus:
+          tagSets:
+            - weight: 1
+              tags:
+                ims.transid: LOST
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.region: PRD3
+                transaction.target: MAINFRAME
+                transaction.type: IMS
           maxLatencyMillis: 100
         /getScoring:
+          tagSets:
+            - weight: 1
+              tags:
+                customer.scoring: B
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.target: ERP
+                transaction.type: TSO
           maxLatencyMillis: 100
         /requestLoan:
           downstreamCalls:
@@ -390,6 +458,18 @@ topology:
               route: /sendScoringInputs
           maxLatencyMillis: 100
         /sendLoanInputs:
+          tagSets:
+            - weight: 1
+              tags:
+                ims.transid: LOIN
+                customer.category: AA
+                loan.amount: 100,000
+                loan.type: household
+                loan.category: ATY
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.region: PRD3
+                transaction.target: MAINFRAME
+                transaction.type: IMS
           downstreamCalls:
             - service: loan
               route: /getAgreement
@@ -451,6 +531,10 @@ topology:
         - weight: 1
           tags:
             version: 5.2
+          tagGenerators:
+            - numTags: 25
+              numVals: 3000
+              valLength: 16
           inherit:
             - region
       resourceAttrSets:
@@ -594,9 +678,12 @@ topology:
               route: /transferMoney
           maxLatencyMillis: 100
         /transferMoney:
-          tags:
-            transfer.id: 456789
-            transfer.destination: BNPP
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.destination: BNPP
+                transaction.id: 456789
+                transaction.type: external
           downstreamCalls:
             - service: ext-api-gateway
               route: /ext-api/transferMoney
@@ -613,12 +700,13 @@ topology:
               route: /transferMoney
           maxLatencyMillis: 100
         /transferMoney:
-          tags:
-            cics.transid: TRNI
-            transfer.id: 123456
-            transaction.region: PRD1
-            transaction.target: MAINFRAME
-            transaction.type: CICS
+          tagSets:
+            - tags:
+                cics.transid: TRNI
+                transfer.id: 123456
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
           downstreamCalls:
           maxLatencyMillis: 100
     web:
@@ -797,10 +885,10 @@ flags:
 rootRoutes:
   - service: android
     route: /login
-    tracesPerHour: 120
+    tracesPerHour: 1200
   - service: android
     route: /make-payment
-    tracesPerHour: 120
+    tracesPerHour: 360
   - service: iOS
     route: /login
     tracesPerHour: 1800
@@ -809,25 +897,25 @@ rootRoutes:
     tracesPerHour: 600
   - service: web
     route: /login
-    tracesPerHour: 120
+    tracesPerHour: 1200
   - service: api-gateway
     route: /api/getAccountBalance
-    tracesPerHour: 120
+    tracesPerHour: 1200
   - service: api-gateway
     route: /api/getPayment
-    tracesPerHour: 60
+    tracesPerHour: 600
   - service: api-gateway
     route: /api/requestLoan
-    tracesPerHour: 12
+    tracesPerHour: 120
   - service: api-gateway
     route: /api/requestTransfer
-    tracesPerHour: 30
+    tracesPerHour: 360
   - service: api-gateway
     route: /api/searchProduct
-    tracesPerHour: 12
+    tracesPerHour: 240
   - service: api-gateway
     route: /api/subscribeProduct
-    tracesPerHour: 6
+    tracesPerHour: 120
 
 config:
   kubernetes:
