@@ -974,10 +974,10 @@ rootRoutes:
     tracesPerHour: 120
   - service: api-gateway
     route: /api/requestTransferExternal
-    tracesPerHour: 1800
+    tracesPerHour: 120
   - service: api-gateway
     route: /api/requestTransferInternal
-    tracesPerHour: 1800
+    tracesPerHour: 180
   - service: api-gateway
     route: /api/searchProduct
     tracesPerHour: 240
