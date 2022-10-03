@@ -13,7 +13,7 @@ topology:
             account.id: 123456789
             region: us-east-1
             transaction.external: true
-            version: 10.3.234
+            service.version: 10.3.234
       resourceAttrSets:
         - weight: 1
           kubernetes:
@@ -70,7 +70,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: 3.7.1
+            service.version: 3.7.1
             region: us-east-1
       resourceAttrSets:
         - weight: 1
@@ -157,7 +157,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: 1.0.0
+            service.version: 1.0.0
       resourceAttrSets:
         - weight: 1
           kubernetes:
@@ -246,7 +246,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: 5.4.0
+            service.version: 5.4.0
       routes:
         /getProfile:
           downstreamCalls:
@@ -267,7 +267,7 @@ topology:
         - weight: 1
           tags:
             transaction.external: true
-            version: 1.0.0
+            service.version: 1.0.0
       resourceAttrSets:
         - weight: 1
           kubernetes:
@@ -367,13 +367,13 @@ topology:
         - weight: 90
           flag_set: auth_errors
           tags:
-            version: 3.4.0
+            service.version: 3.4.0
             error: true
             error.message: "CRITICAL: can't access profile"
         - weight: 10
           flag_unset: auth_errors
           tags:
-            version: 3.3.5
+            service.version: 3.3.5
       routes:
         /getPrivileges:
           maxLatencyMillis: 200
@@ -384,11 +384,11 @@ topology:
           tags:
             error: true
             error.message: "ERROR: unable to login"
-            version: 5.4.231
+            service.version: 5.4.231
         - weight: 10
           flag_unset: auth_errors
           tags:
-            version: 5.4.231
+            service.version: 5.4.231
       resourceAttrSets:
         - weight: 1
           resourceAttrs:
@@ -431,7 +431,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: 10.4.214
+            service.version: 10.4.214
       routes:
         /checkBlacklist:
           tagSets:
@@ -512,7 +512,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: v177
+            service.version: 1.7.7
             region: us-east-1
       resourceAttrSets:
         - weight: 1
@@ -557,7 +557,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: 1.1.0
+            service.version: 1.1.0
       resourceAttrSets:
         - weight: 1
           kubernetes:
@@ -593,7 +593,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: 5.2
+            service.version: 5.2
           tagGenerators:
             - numTags: 20
               numVals: 3000
@@ -641,7 +641,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: 2.3.432
+            service.version: 2.3.432
             region: us-east-1
       resourceAttrSets:
         - weight: 1
@@ -675,6 +675,10 @@ topology:
               route: /getProducts
           maxLatencyMillis: 200
     subscription:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 1.0.0
       routes:
         /subscribeProduct:
           downstreamCalls:
@@ -683,19 +687,19 @@ topology:
           maxLatencyMillis: 200
     transfer:
       tagSets:
-        - weight: 1
+        - weight: 66
           flag_set: transfer_internal
           flag_unset: transfer_external
           tags:
             transfer.type: internal
-            version: 5.2.107
-        - weight: 1
+            service.version: 5.2.107
+        - weight: 34
           flag_set: transfer_external
           flag_unset: transfer_internal
           tags:
             transfer.destination: BankAzure
             transfer.type: external
-            version: 5.2.107
+            service.version: 5.2.107
       routes:
         /checkSourceBalance:
           downstreamCalls:
@@ -738,7 +742,7 @@ topology:
         - weight: 1
           tags:
             transaction.external: true
-            version: 3.1.1
+            service.version: 3.1.1
       routes:
         /checkCompliance:
           maxLatencyMillis: 100
@@ -766,7 +770,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: 7.0.1
+            service.version: 7.0.1
       routes:
         /requestTransfer:
           downstreamCalls:
@@ -788,7 +792,7 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            version: 1.2.5
+            service.version: 1.2.5
       resourceAttrSets:
         - weight: 1
           kubernetes:
