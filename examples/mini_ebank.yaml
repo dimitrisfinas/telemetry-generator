@@ -227,9 +227,14 @@ topology:
             - service: loan
               route: /requestLoan
           maxLatencyMillis: 100
-        /api/requestTransfer:
+        /api/requestTransferExternal:
           downstreamCalls:
-            - service: transfer
+            - service: transfer-external
+              route: /requestTransfer
+          maxLatencyMillis: 100
+        /api/requestTransferInternal:
+          downstreamCalls:
+            - service: transfer-internal
               route: /requestTransfer
           maxLatencyMillis: 100
         /api/searchProduct:
@@ -535,15 +540,15 @@ topology:
         /CreditCardInfo:
           downstreamCalls:
           tagSets:
-            - weight: 1
+            - weight: 34
               tags:
                 card.type: AMEX
-            - weight: 1
+            - weight: 33
               tags:
                 card.type: VISA
-            - weight: 1
+            - weight: 33
               tags:
-                card.type: MASTERDCARD
+                card.type: MASTERCARD
           maxLatencyMillis: 100
         /CardPayment:
           downstreamCalls:
@@ -685,23 +690,19 @@ topology:
             - service: productcatalog
               route: /getProducts
           maxLatencyMillis: 200
-    transfer:
+    transfer-external:
       tagSets:
-        - weight: 66
-          flag_set: transfer_internal
-          flag_unset: transfer_external
+        - weight: 1
           tags:
-            transfer.type: internal
-            service.version: 5.2.107
-        - weight: 34
-          flag_set: transfer_external
-          flag_unset: transfer_internal
-          tags:
-            transfer.destination: BankAzure
             transfer.type: external
-            service.version: 5.2.107
+            service.version: 3.1.1
       routes:
-        /checkSourceBalance:
+        /checkCompliance:
+          downstreamCalls:
+            - service: ext-api-gateway
+              route: /ext-api/checkTransferCompliance
+          maxLatencyMillis: 100
+        /checkSourceAcctBalance:
           downstreamCalls:
             - service: accountbalance
               route: /getAccountBalance
@@ -710,46 +711,10 @@ topology:
           maxLatencyMillis: 300
         /requestTransfer:
           downstreamCalls:
-            - service: transfer
-              route: /checkSourceBalance
-#            - service: transfer
-#              route: /requestTransferInt
-#            - service: transfer
-#              route: /requestTransferExt
-            - service: transfer
-              route: /getTransferStatus
-          maxLatencyMillis: 100
-#        /requestTransfer:
-#          downstreamCalls:
-#            - service: transfer
-#              route: /requestTransferExt
-#          flag_set: transfer_external
-#          maxLatencyMillis: 100
-        /requestTransfer_Ext:
-          downstreamCalls:
             - service: transfer-external
-              route: /requestTransfer
-          flag_set: transfer_external
-          maxLatencyMillis: 100
-        /requestTransfer_Int:
-          downstreamCalls:
-            - service: transfer-internal
-              route: /requestTransfer
-          flag_set: transfer_internal
-          maxLatencyMillis: 100
-    transfer-external:
-      tagSets:
-        - weight: 1
-          tags:
-            transaction.external: true
-            service.version: 3.1.1
-      routes:
-        /checkCompliance:
-          maxLatencyMillis: 100
-        /requestTransfer:
-          downstreamCalls:
-            - service: ext-api-gateway
-              route: /ext-api/checkTransferCompliance
+              route: /checkSourceAcctBalance
+            - service: transfer-external
+              route: /checkCompliance
             - service: transfer-external
               route: /transferMoney
           maxLatencyMillis: 100
@@ -765,15 +730,27 @@ topology:
           downstreamCalls:
             - service: ext-api-gateway
               route: /ext-api/transferMoney
-          maxLatencyMillis: 100
+            - service: transfer-external
+              route: /getTransferStatus
+          maxLatencyMillis: 300
     transfer-internal:
       tagSets:
         - weight: 1
           tags:
+            transfer.type: internal
             service.version: 7.0.1
       routes:
+        /checkSourceAcctBalance:
+          downstreamCalls:
+            - service: accountbalance
+              route: /getAccountBalance
+          maxLatencyMillis: 100
+        /getTransferStatus:
+          maxLatencyMillis: 300
         /requestTransfer:
           downstreamCalls:
+            - service: transfer-internal
+              route: /checkSourceAcctBalance
             - service: transfer-internal
               route: /transferMoney
           maxLatencyMillis: 100
@@ -787,6 +764,8 @@ topology:
                 transaction.target: MAINFRAME
                 transaction.type: CICS
           downstreamCalls:
+            - service: transfer-internal
+              route: /getTransferStatus
           maxLatencyMillis: 100
     web:
       tagSets:
@@ -865,10 +844,17 @@ topology:
             - service: web
               route: /loan-status
           maxLatencyMillis: 100
-        /request-transfer:
+        /request-transfer-external:
           downstreamCalls:
             - service: api-gateway
-              route: /api/requestTransfer
+              route: /api/requestTransferExternal
+            - service: web
+              route: /transfer-status
+          maxLatencyMillis: 100
+        /request-transfer-internal:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/requestTransferInternal
             - service: web
               route: /transfer-status
           maxLatencyMillis: 100
@@ -909,8 +895,6 @@ flags:
 #      start: "0,10,20,30,40,50 * * * *"
 #      end: "5,15,25,35,45,55 * * * *"
   - name: runs_on_azure
-  - name: transfer_external
-  - name: transfer_internal
   - name: sev0_total_failure
   - name: database_outage
   # OOM on currency service + slower span latency from frontend -> currencyservice
@@ -989,8 +973,11 @@ rootRoutes:
     route: /api/requestLoan
     tracesPerHour: 120
   - service: api-gateway
-    route: /api/requestTransfer
-    tracesPerHour: 360
+    route: /api/requestTransferExternal
+    tracesPerHour: 1800
+  - service: api-gateway
+    route: /api/requestTransferInternal
+    tracesPerHour: 1800
   - service: api-gateway
     route: /api/searchProduct
     tracesPerHour: 240
