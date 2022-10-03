@@ -1,3 +1,9 @@
+## INFERRED SERVICE SETTING
+# In order to see the mainframe external systems and external APIs
+# in your Lightstep service map, you can use the following settings
+# Identify: transaction.external: "true"
+# Label: trancation.region, transaction.target
+
 topology:
   services:
     accountbalance:
@@ -238,21 +244,21 @@ topology:
           maxLatencyMillis: 100
     authentication:
       tagSets:
-        - weight: 90
-          flag_set: auth_errors
+        - weight: 1
           tags:
-            version: 3.4.0
-            error: true
-            error.message: "CRITICAL: can't access WSO2 server"
-        - weight: 10
-          flag_unset: auth_errors
-          tags:
-            version: 3.3.5
+            version: 5.4.0
       routes:
-        /login:
+        /getProfile:
           downstreamCalls:
             - service: IAM
               route: /getPrivileges
+          maxLatencyMillis: 300
+        /login:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /detect
+            - service: authentication
+              route: /getProfile
           maxLatencyMillis: 100
         /logout:
           maxLatencyMillis: 100
@@ -334,13 +340,13 @@ topology:
                 transaction.target: ext-api-trnf
                 transaction.type: API
           maxLatencyMillis: 300
-        /paymentAMEX:
+        /ext-api/paymentAMEX:
           maxLatencyMillis: 100
-        /paymentMASTERCARD:
+        /ext-api/paymentMASTERCARD:
           maxLatencyMillis: 100
-        /paymentVISA:
+        /ext-api/paymentVISA:
           maxLatencyMillis: 100
-        /transferPartner-MorganStanley:
+        /ext-api/transferPartner-MorganStanley:
           tagSets:
             - weight: 1
               tags:
@@ -348,7 +354,7 @@ topology:
                 transaction.target: ext-api-morganstanley
                 transaction.type: API
           maxLatencyMillis: 100
-        /transferSWIFT:
+        /ext-api/transferSWIFT:
           tagSets:
             - weight: 1
               tags:
@@ -357,18 +363,30 @@ topology:
                 transaction.type: API
           maxLatencyMillis: 100
     IAM:
+      tagSets:
+        - weight: 90
+          flag_set: auth_errors
+          tags:
+            version: 3.4.0
+            error: true
+            error.message: "CRITICAL: can't access profile"
+        - weight: 10
+          flag_unset: auth_errors
+          tags:
+            version: 3.3.5
       routes:
         /getPrivileges:
-          maxLatencyMillis: 100
+          maxLatencyMillis: 200
     iOS:
       tagSets:
         - weight: 90
-          flag_set: iOS_errors
+          flag_set: auth_errors
           tags:
             error: true
+            error.message: "ERROR: unable to login"
             version: 5.4.231
         - weight: 10
-          flag_unset: iOS_errors
+          flag_unset: auth_errors
           tags:
             version: 5.4.231
       resourceAttrSets:
@@ -532,6 +550,42 @@ topology:
               service: ext-api-gateway
               route: /ext-api/payment
           maxLatencyMillis: 100
+    pingIdentity:
+      tagSets:
+        - weight: 1
+          tags:
+            version: 1.1.0
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: pingidentity-hostname
+      routes:
+        /authenticate:
+          downstreamCalls:
+          maxLatencyMillis: 50
+        /detect:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /verify
+          maxLatencyMillis: 50
+        /profile:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /authenticate
+          maxLatencyMillis: 50
+        /verify:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /profile
+          maxLatencyMillis: 50
     productcatalog:
       tagSets:
         - weight: 1
@@ -627,7 +681,17 @@ topology:
     transfer:
       tagSets:
         - weight: 1
+          flag_set: transfer_internal
+          flag_unset: transfer_external
           tags:
+            transfer.type: internal
+            version: 5.2.107
+        - weight: 1
+          flag_set: transfer_external
+          flag_unset: transfer_internal
+          tags:
+            transfer.destination: BankAzure
+            transfer.type: external
             version: 5.2.107
       routes:
         /checkSourceBalance:
@@ -639,34 +703,32 @@ topology:
           maxLatencyMillis: 300
         /requestTransfer:
           downstreamCalls:
-            - weight: 66
-              service: transfer
-              route: /requestTransferInt
-            - weight: 34
-              service: transfer
-              route: /requestTransferExt
-          maxLatencyMillis: 100
-        /requestTransferExt:
-          tags:
-            transfer.type: external
-          downstreamCalls:
             - service: transfer
               route: /checkSourceBalance
+#            - service: transfer
+#              route: /requestTransferInt
+#            - service: transfer
+#              route: /requestTransferExt
+            - service: transfer
+              route: /getTransferStatus
+          maxLatencyMillis: 100
+#        /requestTransfer:
+#          downstreamCalls:
+#            - service: transfer
+#              route: /requestTransferExt
+#          flag_set: transfer_external
+#          maxLatencyMillis: 100
+        /requestTransfer_Ext:
+          downstreamCalls:
             - service: transfer-external
               route: /requestTransfer
-            - service: transfer
-              route: /getTransferStatus
+          flag_set: transfer_external
           maxLatencyMillis: 100
-        /requestTransferInt:
-          tags:
-            transfer.type: internal
+        /requestTransfer_Int:
           downstreamCalls:
-            - service: transfer
-              route: /checkSourceBalance
             - service: transfer-internal
               route: /requestTransfer
-            - service: transfer
-              route: /getTransferStatus
+          flag_set: transfer_internal
           maxLatencyMillis: 100
     transfer-external:
       tagSets:
@@ -688,7 +750,7 @@ topology:
           tagSets:
             - weight: 1
               tags:
-                transfer.destination: BNPP
+                transfer.destination: BankAzure
                 transaction.external: true
                 transaction.id: 456789
                 transaction.target: ext-api-swift
@@ -776,17 +838,17 @@ topology:
               route: /api/login
             - service: ads
               route: /AdRequest
-          maxLatencyMillis: 100
+          maxLatencyMillis: 300
         /logout:
           downstreamCalls:
             - service: api-gateway
               route: /api/logout
-          maxLatencyMillis: 100
+          maxLatencyMillis: 150
         /make-payment:
           downstreamCalls:
             - service: web
               route: /submit-payment
-          maxLatencyMillis: 100
+          maxLatencyMillis: 300
         /payment-status:
           maxLatencyMillis: 500
         /request-loan:
@@ -834,12 +896,14 @@ flags:
     cron:
       start: "0,10,20,30,40,50 * * * *"
       end: "5,15,25,35,45,55 * * * *"
-  - name: iOS_errors
-    # use https://crontab.guru/
-    cron:
-      start: "0,10,20,30,40,50 * * * *"
-      end: "5,15,25,35,45,55 * * * *"
+#  - name: iOS_errors
+#    # use https://crontab.guru/
+#    cron:
+#      start: "0,10,20,30,40,50 * * * *"
+#      end: "5,15,25,35,45,55 * * * *"
   - name: runs_on_azure
+  - name: transfer_external
+  - name: transfer_internal
   - name: sev0_total_failure
   - name: database_outage
   # OOM on currency service + slower span latency from frontend -> currencyservice
