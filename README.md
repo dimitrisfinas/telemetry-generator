@@ -108,3 +108,6 @@ When building with Docker, you need to re-run both steps for any code *or* confi
   ```shell
   sudo systemctl stop otelcol
   ```
+
+- getting error: `Error: failed to compile the OpenTelemetry Collector distribution: exit status 2. Output: "# github.com/lightstep/telemetry-generator/generatorreceiver/internal/topology\n../generatorreceiver/internal/topology/pickable.go:18:6: missing function body\n../generatorreceiver/internal/topology/pickable.go:18:23: syntax error: unexpected [, expecting (\n../generatorreceiver/internal/topology/pickable.go:20:2: syntax error: non-declaration statement outside function body\n../generatorreceiver/internal/topology/pickable.go:39:2: syntax error: non-declaration statement outside function body\nnote: module requires Go 1.18\n"`
+  - upgrade to go version 1.18
