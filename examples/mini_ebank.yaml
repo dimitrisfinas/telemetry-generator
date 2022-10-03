@@ -30,10 +30,31 @@ topology:
               route: /getIncomingOperations
           maxLatencyMillis: 1000
         /getAccountHistory:
+          tagSets:
+            - weight: 1
+              tags:
+                db2.transid: HIST
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: DB2
           maxLatencyMillis: 500
         /getBalance:
+          tagSets:
+            - weight: 1
+              tags:
+                cics.transid: ACTB
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
           maxLatencyMillis: 100
         /getIncomingOperations:
+          tagSets:
+            - weight: 1
+              tags:
+                cics.transid: INCO
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
           maxLatencyMillis: 300
     ads:
       tagSets:
@@ -56,6 +77,8 @@ topology:
       routes:
         /AdRequest:
           downstreamCalls:
+            - service: api-gateway
+              route: /api/getRecommendations
             - service: ads
               route: /Ad
           latencyConfigs:
@@ -83,6 +106,8 @@ topology:
           downstreamCalls:
           maxLatencyMillis: 200
     android:
+      tags:
+        span.kind: client
       resourceAttrSets:
         - weight: 1
           resourceAttrs:
@@ -182,6 +207,11 @@ topology:
             - service: payment
               route: /CardPayment
           maxLatencyMillis: 100
+        /api/getRecommendations:
+          downstreamCalls:
+            - service: recommendation
+              route: /getRecommendations
+          maxLatencyMillis: 100
         /api/requestLoan:
           downstreamCalls:
             - service: loan
@@ -189,17 +219,27 @@ topology:
           maxLatencyMillis: 100
         /api/requestTransfer:
           downstreamCalls:
-            - service: transfer-internal
+            - service: transfer
               route: /requestTransfer
+          maxLatencyMillis: 100
+        /api/searchProduct:
+          downstreamCalls:
+            - service: productcatalog
+              route: /searchProduct
+          maxLatencyMillis: 100
+        /api/subscribeProduct:
+          downstreamCalls:
+            - service: subscription
+              route: /subscribeProduct
           maxLatencyMillis: 100
     authentication:
       tagSets:
-        - weight: 1
+        - weight: 90
           flag_set: auth_errors
           tags:
             version: 3.4.0
             error: true
-        - weight: 1
+        - weight: 10
           flag_unset: auth_errors
           tags:
             version: 3.3.5
@@ -258,8 +298,12 @@ topology:
         /ext-api/checkBlacklist:
           maxLatencyMillis: 500
         /ext-api/checkTransferCompliance:
+          tags:
+            transfer.compliance: approved
           maxLatencyMillis: 500
         /ext-api/payment:
+          maxLatencyMillis: 300
+        /ext-api/transferMoney:
           maxLatencyMillis: 300
         /paymentAMEX:
           maxLatencyMillis: 100
@@ -277,12 +321,12 @@ topology:
           maxLatencyMillis: 100
     iOS:
       tagSets:
-        - weight: 1
+        - weight: 90
           flag_set: iOS_errors
           tags:
-            version: 5.4.231
             error: true
-        - weight: 1
+            version: 5.4.231
+        - weight: 10
           flag_unset: iOS_errors
           tags:
             version: 5.4.231
@@ -436,7 +480,7 @@ topology:
             - weight: 1
               inherit:
                 - starter
-        /searchProducts:
+        /searchProduct:
           downstreamCalls:
           tagSets:
             - weight: 15
@@ -483,31 +527,99 @@ topology:
             - service: productcatalog
               route: /getProducts
           maxLatencyMillis: 200
-    transfer-internal:
+    subscription:
+      routes:
+        /subscribeProduct:
+          downstreamCalls:
+            - service: productcatalog
+              route: /getProducts
+          maxLatencyMillis: 200
+    transfer:
       tagSets:
         - weight: 1
           tags:
             version: 5.2.107
       routes:
-        /checkCompliance:
-          maxLatencyMillis: 100
         /checkSourceBalance:
+          downstreamCalls:
+            - service: accountbalance
+              route: /getAccountBalance
           maxLatencyMillis: 100
         /getTransferStatus:
           maxLatencyMillis: 300
         /requestTransfer:
           downstreamCalls:
-            - service: transfer-internal
+            - weight: 66
+              service: transfer
+              route: /requestTransferInt
+            - weight: 34
+              service: transfer
+              route: /requestTransferExt
+          maxLatencyMillis: 100
+        /requestTransferExt:
+          tags:
+            transfer.type: external
+          downstreamCalls:
+            - service: transfer
               route: /checkSourceBalance
+            - service: transfer-external
+              route: /requestTransfer
+            - service: transfer
+              route: /getTransferStatus
+          maxLatencyMillis: 100
+        /requestTransferInt:
+          tags:
+            transfer.type: internal
+          downstreamCalls:
+            - service: transfer
+              route: /checkSourceBalance
+            - service: transfer-internal
+              route: /requestTransfer
+            - service: transfer
+              route: /getTransferStatus
+          maxLatencyMillis: 100
+    transfer-external:
+      tagSets:
+        - weight: 1
+          tags:
+            version: 3.1.1
+      routes:
+        /checkCompliance:
+          maxLatencyMillis: 100
+        /requestTransfer:
+          downstreamCalls:
             - service: ext-api-gateway
               route: /ext-api/checkTransferCompliance
+            - service: transfer-external
+              route: /transferMoney
+          maxLatencyMillis: 100
+        /transferMoney:
+          tags:
+            transfer.id: 456789
+            transfer.destination: BNPP
+          downstreamCalls:
+            - service: ext-api-gateway
+              route: /ext-api/transferMoney
+          maxLatencyMillis: 100
+    transfer-internal:
+      tagSets:
+        - weight: 1
+          tags:
+            version: 7.0.1
+      routes:
+        /requestTransfer:
+          downstreamCalls:
             - service: transfer-internal
               route: /transferMoney
           maxLatencyMillis: 100
         /transferMoney:
+          tags:
+            cics.transid: TRNI
+            transfer.id: 123456
+            transaction.region: PRD1
+            transaction.target: MAINFRAME
+            transaction.type: CICS
           downstreamCalls:
-            - service: transfer-internal
-              route: /getTransferStatus
           maxLatencyMillis: 100
     web:
       tagSets:
@@ -579,8 +691,6 @@ topology:
           maxLatencyMillis: 100
         /payment-status:
           maxLatencyMillis: 500
-        /transfer-status:
-          maxLatencyMillis: 500
         /request-loan:
           downstreamCalls:
             - service: api-gateway
@@ -595,6 +705,11 @@ topology:
             - service: web
               route: /transfer-status
           maxLatencyMillis: 100
+        /search-product:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/searchProduct
+          maxLatencyMillis: 300
         /submit-payment:
           downstreamCalls:
             - service: api-gateway
@@ -602,6 +717,17 @@ topology:
             - service: web
               route: /payment-status
           maxLatencyMillis: 100
+        /subscribe-product:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/subscribeProduct
+            - service: web
+              route: /subscription-status
+          maxLatencyMillis: 100
+        /subscription-status:
+          maxLatencyMillis: 500
+        /transfer-status:
+          maxLatencyMillis: 500
 
 flags:
   # This is a cron-style flag
@@ -671,32 +797,37 @@ flags:
 rootRoutes:
   - service: android
     route: /login
-    tracesPerHour: 2000
-  - service: iOS
-    route: /login
-    tracesPerHour: 2880
-  - service: web
-    route: /login
-    tracesPerHour: 1440
+    tracesPerHour: 120
   - service: android
     route: /make-payment
-    tracesPerHour: 480
+    tracesPerHour: 120
+  - service: iOS
+    route: /login
+    tracesPerHour: 1800
   - service: iOS
     route: /make-payment
-    tracesPerHour: 480
+    tracesPerHour: 600
   - service: web
-    route: /account-balance
-    tracesPerHour: 1200
-  - service: web
-    route: /make-payment
-    tracesPerHour: 480
-  - service: web
-    route: /request-loan
+    route: /login
     tracesPerHour: 120
-  - service: web
-    route: /request-transfer
-    tracesPerHour: 240
-
+  - service: api-gateway
+    route: /api/getAccountBalance
+    tracesPerHour: 120
+  - service: api-gateway
+    route: /api/getPayment
+    tracesPerHour: 60
+  - service: api-gateway
+    route: /api/requestLoan
+    tracesPerHour: 12
+  - service: api-gateway
+    route: /api/requestTransfer
+    tracesPerHour: 30
+  - service: api-gateway
+    route: /api/searchProduct
+    tracesPerHour: 12
+  - service: api-gateway
+    route: /api/subscribeProduct
+    tracesPerHour: 6
 
 config:
   kubernetes:
