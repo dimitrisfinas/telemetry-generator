@@ -38,9 +38,18 @@ topology:
           maxLatencyMillis: 1000
         /getAccountHistory:
           tagSets:
+            - weight: 99
+              tags:
+                db2.transid: HIST
+                transaction.id: HISTNFDLZ13253KDF23
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: DB2
             - weight: 1
               tags:
                 db2.transid: HIST
+                error: true
+                error.message: "ERROR: transaction unreachable, retry later"
                 transaction.id: HISTNFDLZ13253KDF23
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
@@ -48,9 +57,18 @@ topology:
           maxLatencyMillis: 500
         /getBalance:
           tagSets:
+            - weight: 99
+              tags:
+                cics.transid: ACTB
+                transaction.id: ACTBHSDDS21324536
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
             - weight: 1
               tags:
                 cics.transid: ACTB
+                error: true
+                error.message: "ERROR: transaction unreachable, retry later"
                 transaction.id: ACTBHSDDS21324536
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
@@ -116,14 +134,17 @@ topology:
           downstreamCalls:
           maxLatencyMillis: 200
     android:
-      tags:
-        span.kind: client
+      tagSets:
+        - weight: 1
+          tags:
+            span.kind: client
       resourceAttrSets:
         - weight: 1
           resourceAttrs:
-            instrumentation.name: lightstep
-            http.method: POST
             client.platform: android
+            http.method: POST
+            instrumentation.name: lightstep
+            service.version: 6.12.231
       metrics:
         - name: requests
           type: Sum
@@ -133,6 +154,13 @@ topology:
           shape: triangle
       routes:
         /login:
+          tagSets:
+            - weight: 99
+              tags:
+            - weight: 1
+              tags:
+                error: true
+                error.message: "ERROR: bad login or password"
           downstreamCalls:
             - service: api-gateway
               route: /api/login
@@ -370,13 +398,13 @@ topology:
     IAM:
       tagSets:
         - weight: 90
-          flag_set: auth_errors
+          flag_set: iam_errors
           tags:
             service.version: 3.4.0
             error: true
             error.message: "CRITICAL: can't access profile"
         - weight: 10
-          flag_unset: auth_errors
+          flag_unset: iam_errors
           tags:
             service.version: 3.3.5
       routes:
@@ -385,13 +413,13 @@ topology:
     iOS:
       tagSets:
         - weight: 90
-          flag_set: auth_errors
+          flag_set: iam_errors
           tags:
             error: true
             error.message: "ERROR: unable to login"
             service.version: 5.4.231
         - weight: 10
-          flag_unset: auth_errors
+          flag_unset: iam_errors
           tags:
             service.version: 5.4.231
       resourceAttrSets:
@@ -409,6 +437,15 @@ topology:
           shape: triangle
       routes:
         /login:
+          tagSets:
+            - weight: 99
+              flag_unset: iam_errors
+              tags:
+            - weight: 1
+              flag_unset: iam_errors
+              tags:
+                error: true
+                error.message: "ERROR: bad login or password"
           downstreamCalls:
             - service: api-gateway
               route: /api/login
@@ -419,7 +456,7 @@ topology:
           downstreamCalls:
             - service: iOS
               route: /submit-payment
-          flag_unset: auth_errors
+          flag_unset: iam_errors
           maxLatencyMillis: 100
         /submit-payment:
           downstreamCalls:
@@ -427,10 +464,10 @@ topology:
               route: /api/getPayment
             - service: iOS
               route: /payment-status
-          flag_unset: auth_errors
+          flag_unset: iam_errors
           maxLatencyMillis: 100
         /payment-status:
-          flag_unset: auth_errors
+          flag_unset: iam_errors
           maxLatencyMillis: 100
     loan:
       tagSets:
@@ -459,11 +496,24 @@ topology:
                 transaction.region: PRD3
                 transaction.target: MAINFRAME
                 transaction.type: IMS
+          downstreamCalls:
+            - service: loan
+              route: /getLoanStatus
           maxLatencyMillis: 100
         /getLoanStatus:
           tagSets:
+            - weight: 99
+              tags:
+                ims.transid: LOST
+                transaction.external: true
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.region: PRD3
+                transaction.target: MAINFRAME
+                transaction.type: IMS
             - weight: 1
               tags:
+                error: true
+                error.message: "ERROR: transaction unreachable, retry later"
                 ims.transid: LOST
                 transaction.external: true
                 transaction.id: LOIN234QDSFFDSG23435
@@ -705,9 +755,17 @@ topology:
         /checkSourceAcctBalance:
           downstreamCalls:
             - service: accountbalance
-              route: /getAccountBalance
+              route: /getBalance
           maxLatencyMillis: 100
         /getTransferStatus:
+          tagSets:
+            - tags:
+                cics.transid: TRST
+                transfer.id: TRFE456789
+                transaction.external: true
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
           maxLatencyMillis: 300
         /requestTransfer:
           downstreamCalls:
@@ -723,6 +781,7 @@ topology:
             - weight: 1
               tags:
                 transfer.destination: BankAzure
+                transfer.id: TRFE456789
                 transaction.external: true
                 transaction.id: 456789
                 transaction.target: ext-api-swift
@@ -746,6 +805,14 @@ topology:
               route: /getAccountBalance
           maxLatencyMillis: 100
         /getTransferStatus:
+          tagSets:
+            - tags:
+                cics.transid: TRST
+                transfer.id: 123456
+                transaction.external: true
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
           maxLatencyMillis: 300
         /requestTransfer:
           downstreamCalls:
@@ -819,6 +886,13 @@ topology:
         /loan-status:
           maxLatencyMillis: 500
         /login:
+          tagSets:
+            - weight: 98
+              tags:
+            - weight: 2
+              tags:
+                error: true
+                error.message: "ERROR: bad login or password"
           downstreamCalls:
             - service: api-gateway
               route: /api/login
@@ -884,35 +958,17 @@ topology:
 
 flags:
   # This is a cron-style flag
-  - name: auth_errors
+  - name: iam_errors
     # use https://crontab.guru/
     cron:
-      start: "0,10,20,30,40,50 * * * *"
-      end: "5,15,25,35,45,55 * * * *"
-#  - name: iOS_errors
-#    # use https://crontab.guru/
-#    cron:
+# Every 5 Minutes
 #      start: "0,10,20,30,40,50 * * * *"
 #      end: "5,15,25,35,45,55 * * * *"
+      start: "0,30 * * * *"
+      end: "15,45 * * * *"
   - name: runs_on_azure
   - name: sev0_total_failure
   - name: database_outage
-  # OOM on currency service + slower span latency from frontend -> currencyservice
-  - name: currencyservice_oom.default
-    incident:
-      parentFlag: currencyservice_fail
-      start: 0m
-      duration: 10m
-  - name: currencyservice_oom.phase_1
-    incident:
-      parentFlag: currencyservice_fail
-      start: 0m
-      duration: 10m
-  - name: currencyservice_oom.phase_2
-    incident:
-      parentFlag: currencyservice_fail
-      start: 3m
-      duration: 7m
   - name: auth_doom
     cron:
       start: "57,12,27,42 * * * *"
@@ -928,10 +984,6 @@ flags:
       parentFlag: auth_doom
       start: 5m
       # with no duration, lasts until the incident finishes
-  - name: currencyservice_fail
-    cron:
-      start: "57,12,27,42 * * * *"
-      end: "10,25,40,55 * * * *"
   - name: ads_bug
     cron:
       start: "0,20,40 * * * *"
@@ -950,40 +1002,40 @@ flags:
 rootRoutes:
   - service: android
     route: /login
-    tracesPerHour: 1200
-  - service: android
-    route: /make-payment
-    tracesPerHour: 360
+    tracesPerHour: 2400
+#  - service: android
+#    route: /make-payment
+#    tracesPerHour: 720
   - service: iOS
     route: /login
-    tracesPerHour: 1800
-  - service: iOS
-    route: /make-payment
-    tracesPerHour: 600
+    tracesPerHour: 3600
+#  - service: iOS
+#    route: /make-payment
+#    tracesPerHour: 1200
   - service: web
     route: /login
-    tracesPerHour: 1200
+    tracesPerHour: 1800
   - service: api-gateway
     route: /api/getAccountBalance
-    tracesPerHour: 1200
+    tracesPerHour: 2400
   - service: api-gateway
     route: /api/getPayment
-    tracesPerHour: 600
+    tracesPerHour: 1200
   - service: api-gateway
     route: /api/requestLoan
-    tracesPerHour: 120
-  - service: api-gateway
-    route: /api/requestTransferExternal
-    tracesPerHour: 120
-  - service: api-gateway
-    route: /api/requestTransferInternal
-    tracesPerHour: 180
-  - service: api-gateway
-    route: /api/searchProduct
     tracesPerHour: 240
   - service: api-gateway
+    route: /api/requestTransferExternal
+    tracesPerHour: 240
+  - service: api-gateway
+    route: /api/requestTransferInternal
+    tracesPerHour: 360
+  - service: api-gateway
+    route: /api/searchProduct
+    tracesPerHour: 480
+  - service: api-gateway
     route: /api/subscribeProduct
-    tracesPerHour: 120
+    tracesPerHour: 240
 
 config:
   kubernetes:
