@@ -1,0 +1,326 @@
+## INFERRED SERVICE SETTING
+# In order to see the mainframe external systems and external APIs
+# in your Lightstep service map, you can use the following settings
+# Identify: transaction.external: "true"
+# Label: trancation.region, transaction.target
+
+topology:
+  services:
+    ads:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 3.7.1
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-10
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: ads-hostname
+      routes:
+        /AdRequest:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/getRecommendations
+            - service: ads
+              route: /Ad
+          latencyConfigs:
+            - p0: 25ms
+              p50: 75ms
+              p95: 100ms
+              p99: 120ms
+              p99.9: 150ms
+              p100: 200ms
+        /Ad:
+          downstreamCalls:
+          maxLatencyMillis: 200
+    api-gateway:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 1.0.0
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            pod_count: 10
+            restart:
+              every: 10m
+              jitter: 2m
+            cluster_name: k8s-cluster-23
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-east-1
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            restart:
+              every: 5m
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+      routes:
+        /api/login:
+          downstreamCalls:
+            - service: authentication
+              route: /login
+          maxLatencyMillis: 100
+        /api/logout:
+          downstreamCalls:
+            - service: authentication
+              route: /logout
+          maxLatencyMillis: 100
+        /api/getRecommendations:
+          downstreamCalls:
+            - service: recommendation
+              route: /getRecommendations
+          maxLatencyMillis: 100
+        /api/searchProduct:
+          downstreamCalls:
+            - service: productcatalog
+              route: /searchProduct
+          maxLatencyMillis: 100
+    authentication:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 5.4.0
+      routes:
+        /getProfile:
+          downstreamCalls:
+            - service: IAM
+              route: /getPrivileges
+          maxLatencyMillis: 300
+        /login:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /detect
+            - service: authentication
+              route: /getProfile
+          maxLatencyMillis: 100
+        /logout:
+          downstreamCalls:
+          maxLatencyMillis: 100
+    IAM:
+      tagSets:
+        - weight: 90
+          flag_set: iam_errors
+          tags:
+            service.version: 3.4.0
+            error: true
+            error.message: "CRITICAL: can't access profile"
+        - weight: 10
+          flag_unset: iam_errors
+          tags:
+            service.version: 3.3.5
+      routes:
+        /getPrivileges:
+          downstreamCalls:
+          maxLatencyMillis: 200
+    iOS:
+      tagSets:
+        - weight: 90
+          flag_set: iam_errors
+          tags:
+            error: true
+            error.message: "ERROR: unable to login"
+            service.version: 5.4.231
+        - weight: 10
+          flag_unset: iam_errors
+          tags:
+            service.version: 5.4.231
+      resourceAttrSets:
+        - weight: 1
+          resourceAttrs:
+            instrumentation.name: lightstep
+            http.method: POST
+            client.platform: iOS
+      metrics:
+        - name: requests
+          type: Sum
+          max: 400
+          min: 0
+          period: 5m
+          shape: triangle
+      routes:
+        /login:
+          tagSets:
+            - weight: 99
+              flag_unset: iam_errors
+              tags:
+            - weight: 1
+              flag_unset: iam_errors
+              tags:
+                error: true
+                error.message: "ERROR: bad login or password"
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/login
+            - service: ads
+              route: /AdRequest
+          maxLatencyMillis: 100
+    pingIdentity:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 1.1.0
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: pingidentity-hostname
+      routes:
+        /authenticate:
+          downstreamCalls:
+          maxLatencyMillis: 50
+        /detect:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /verify
+          maxLatencyMillis: 50
+        /profile:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /authenticate
+          maxLatencyMillis: 50
+        /verify:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /profile
+          maxLatencyMillis: 50
+    productcatalog:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 5.2
+          tagGenerators:
+            - numTags: 20
+              numVals: 3000
+              valLength: 16
+          inherit:
+            - region
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-2
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: azure
+            cloud.region: Central-US
+            host.type: t3.medium
+        - weight: 1
+          resourceAttrs:
+            cloud.provider: azure
+            cloud.region: West-US
+            host.type: t3.medium
+      routes:
+        /getProducts:
+          downstreamCalls:
+          maxLatencyMillis: 100
+          tagSets:
+            - weight: 1
+              inherit:
+                - starter
+        /searchProduct:
+          tagSets:
+            - weight: 15
+              tags:
+                error: true
+                error.message: product not found
+                http.status_code: 503
+            - weight: 85
+              tags:
+          downstreamCalls:
+          maxLatencyMillis: 400
+    recommendation:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 2.3.432
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-3
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-3
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-1
+      routes:
+        /getRecommendations:
+          downstreamCalls:
+            - service: productcatalog
+              route: /getProducts
+          maxLatencyMillis: 200
+
+flags:
+  # This is a cron-style flag
+  - name: iam_errors
+    # use https://crontab.guru/
+    cron:
+# Every Minutes and with no duration, so will last until incident finished
+      start: "* * * * *"
+
+
+rootRoutes:
+  - service: iOS
+    route: /login
+    tracesPerHour: 1800
+
+config:
+  kubernetes:
+    pod_count: 1
