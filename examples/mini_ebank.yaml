@@ -54,6 +54,7 @@ topology:
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
                 transaction.type: DB2
+          downstreamCalls:
           maxLatencyMillis: 500
         /getBalance:
           tagSets:
@@ -73,6 +74,7 @@ topology:
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
                 transaction.type: CICS
+          downstreamCalls:
           maxLatencyMillis: 100
         /getIncomingOperations:
           tagSets:
@@ -83,6 +85,7 @@ topology:
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
                 transaction.type: CICS
+          downstreamCalls:
           maxLatencyMillis: 300
     ads:
       tagSets:
@@ -173,6 +176,7 @@ topology:
               route: /submit-payment
           maxLatencyMillis: 100
         /payment-status:
+          downstreamCalls:
           maxLatencyMillis: 100
         /submit-payment:
           downstreamCalls:
@@ -294,6 +298,7 @@ topology:
               route: /getProfile
           maxLatencyMillis: 100
         /logout:
+          downstreamCalls:
           maxLatencyMillis: 100
     ext-api-gateway:
       tagSets:
@@ -347,6 +352,7 @@ topology:
                 transaction.id: LOIN234QDSFFDSG23435
                 transaction.target: ext-api-blacklist
                 transaction.type: API
+          downstreamCalls:
           maxLatencyMillis: 500
         /ext-api/checkTransferCompliance:
           tagSets:
@@ -356,6 +362,7 @@ topology:
                 transfer.id: COMP123456
                 transaction.target: ext-api-NRF
                 transaction.type: API
+          downstreamCalls:
           maxLatencyMillis: 500
         /ext-api/payment:
           tagSets:
@@ -364,6 +371,7 @@ topology:
                 transfer.id: PAY940535356964
                 transaction.target: ext-api-card
                 transaction.type: API
+          downstreamCalls:
           maxLatencyMillis: 300
         /ext-api/transferMoney:
           tagSets:
@@ -372,13 +380,8 @@ topology:
                 transfer.id: TRF913234567689884
                 transaction.target: ext-api-trnf
                 transaction.type: API
+          downstreamCalls:
           maxLatencyMillis: 300
-        /ext-api/paymentAMEX:
-          maxLatencyMillis: 100
-        /ext-api/paymentMASTERCARD:
-          maxLatencyMillis: 100
-        /ext-api/paymentVISA:
-          maxLatencyMillis: 100
         /ext-api/transferPartner-MorganStanley:
           tagSets:
             - weight: 1
@@ -386,6 +389,7 @@ topology:
                 transfer.id: TRFDDFQFGFHH1217689884
                 transaction.target: ext-api-morganstanley
                 transaction.type: API
+          downstreamCalls:
           maxLatencyMillis: 100
         /ext-api/transferSWIFT:
           tagSets:
@@ -394,6 +398,7 @@ topology:
                 transfer.id: SWFT913234567689884
                 transaction.target: ext-api-swift
                 transaction.type: API
+          downstreamCalls:
           maxLatencyMillis: 100
     IAM:
       tagSets:
@@ -409,6 +414,7 @@ topology:
             service.version: 3.3.5
       routes:
         /getPrivileges:
+          downstreamCalls:
           maxLatencyMillis: 200
     iOS:
       tagSets:
@@ -468,6 +474,7 @@ topology:
           maxLatencyMillis: 100
         /payment-status:
           flag_unset: iam_errors
+          downstreamCalls:
           maxLatencyMillis: 100
     loan:
       tagSets:
@@ -520,6 +527,7 @@ topology:
                 transaction.region: PRD3
                 transaction.target: MAINFRAME
                 transaction.type: IMS
+          downstreamCalls:
           maxLatencyMillis: 100
         /getScoring:
           tagSets:
@@ -530,6 +538,7 @@ topology:
                 transaction.id: LOIN234QDSFFDSG23435
                 transaction.target: ERP
                 transaction.type: TSO
+          downstreamCalls:
           maxLatencyMillis: 100
         /requestLoan:
           downstreamCalls:
@@ -588,7 +597,6 @@ topology:
               route: /CreditCardInfo
           maxLatencyMillis: 100
         /CreditCardInfo:
-          downstreamCalls:
           tagSets:
             - weight: 34
               tags:
@@ -599,6 +607,7 @@ topology:
             - weight: 33
               tags:
                 card.type: MASTERCARD
+          downstreamCalls:
           maxLatencyMillis: 100
         /CardPayment:
           downstreamCalls:
@@ -683,14 +692,15 @@ topology:
               inherit:
                 - starter
         /searchProduct:
-          downstreamCalls:
           tagSets:
             - weight: 15
               tags:
                 error: true
+                error.message: product not found
                 http.status_code: 503
             - weight: 85
               tags:
+          downstreamCalls:
           maxLatencyMillis: 400
     recommendation:
       tagSets:
@@ -766,6 +776,7 @@ topology:
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
                 transaction.type: CICS
+          downstreamCalls:
           maxLatencyMillis: 300
         /requestTransfer:
           downstreamCalls:
@@ -813,6 +824,7 @@ topology:
                 transaction.region: PRD1
                 transaction.target: MAINFRAME
                 transaction.type: CICS
+          downstreamCalls:
           maxLatencyMillis: 300
         /requestTransfer:
           downstreamCalls:
@@ -884,6 +896,7 @@ topology:
               route: /api/getAccountBalance
           maxLatencyMillis: 1000
         /loan-status:
+          downstreamCalls:
           maxLatencyMillis: 500
         /login:
           tagSets:
@@ -910,6 +923,7 @@ topology:
               route: /submit-payment
           maxLatencyMillis: 300
         /payment-status:
+          downstreamCalls:
           maxLatencyMillis: 500
         /request-loan:
           downstreamCalls:
@@ -952,8 +966,10 @@ topology:
               route: /subscription-status
           maxLatencyMillis: 100
         /subscription-status:
+          downstreamCalls:
           maxLatencyMillis: 500
         /transfer-status:
+          downstreamCalls:
           maxLatencyMillis: 500
 
 flags:
@@ -1002,25 +1018,25 @@ flags:
 rootRoutes:
   - service: android
     route: /login
-    tracesPerHour: 2400
+    tracesPerHour: 1200
 #  - service: android
 #    route: /make-payment
 #    tracesPerHour: 720
   - service: iOS
     route: /login
-    tracesPerHour: 3600
+    tracesPerHour: 1800
 #  - service: iOS
 #    route: /make-payment
 #    tracesPerHour: 1200
   - service: web
     route: /login
-    tracesPerHour: 1800
+    tracesPerHour: 900
   - service: api-gateway
     route: /api/getAccountBalance
-    tracesPerHour: 2400
+    tracesPerHour: 600
   - service: api-gateway
     route: /api/getPayment
-    tracesPerHour: 1200
+    tracesPerHour: 600
   - service: api-gateway
     route: /api/requestLoan
     tracesPerHour: 240
