@@ -319,7 +319,7 @@ flags:
 rootRoutes:
   - service: iOS
     route: /login
-    tracesPerHour: 1800
+    tracesPerHour: 1200
 
 config:
   kubernetes:

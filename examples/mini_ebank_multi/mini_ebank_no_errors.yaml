@@ -429,13 +429,6 @@ topology:
           shape: triangle
       routes:
         /login:
-          tagSets:
-            - weight: 99
-              tags:
-            - weight: 1
-              tags:
-                error: true
-                error.message: "ERROR: bad login or password"
           downstreamCalls:
             - service: api-gateway
               route: /api/login
@@ -992,13 +985,13 @@ flags:
 rootRoutes:
   - service: android
     route: /login
-    tracesPerHour: 900
+    tracesPerHour: 720
 #  - service: android
 #    route: /make-payment
 #    tracesPerHour: 720
   - service: iOS
     route: /login
-    tracesPerHour: 1200
+    tracesPerHour: 900
 #  - service: iOS
 #    route: /make-payment
 #    tracesPerHour: 1200
