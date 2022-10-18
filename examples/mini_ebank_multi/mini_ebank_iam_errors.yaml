@@ -2,7 +2,7 @@
 # In order to see the mainframe external systems and external APIs
 # in your Lightstep service map, you can use the following settings
 # Identify: transaction.external: "true"
-# Label: trancation.region, transaction.target
+# Label: transaction.region, transaction.target
 
 topology:
   services:
