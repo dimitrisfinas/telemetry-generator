@@ -136,7 +136,7 @@ topology:
         /Ad:
           downstreamCalls:
           maxLatencyMillis: 200
-    android:
+    ebank_android:
       tagSets:
         - weight: 1
           tags:
@@ -172,7 +172,7 @@ topology:
           maxLatencyMillis: 100
         /make-payment:
           downstreamCalls:
-            - service: android
+            - service: ebank_android
               route: /submit-payment
           maxLatencyMillis: 100
         /payment-status:
@@ -182,7 +182,7 @@ topology:
           downstreamCalls:
             - service: api-gateway
               route: /api/getPayment
-            - service: android
+            - service: ebank_android
               route: /payment-status
           maxLatencyMillis: 100
     api-gateway:
@@ -416,7 +416,7 @@ topology:
         /getPrivileges:
           downstreamCalls:
           maxLatencyMillis: 200
-    iOS:
+    ebank_iOS:
       tagSets:
         - weight: 90
           flag_set: iam_errors
@@ -460,7 +460,7 @@ topology:
           maxLatencyMillis: 100
         /make-payment:
           downstreamCalls:
-            - service: iOS
+            - service: ebank_iOS
               route: /submit-payment
           flag_unset: iam_errors
           maxLatencyMillis: 100
@@ -468,7 +468,7 @@ topology:
           downstreamCalls:
             - service: api-gateway
               route: /api/getPayment
-            - service: iOS
+            - service: ebank_iOS
               route: /payment-status
           flag_unset: iam_errors
           maxLatencyMillis: 100
@@ -846,7 +846,7 @@ topology:
             - service: transfer-internal
               route: /getTransferStatus
           maxLatencyMillis: 100
-    web:
+    ebank_web:
       tagSets:
         - weight: 1
           tags:
@@ -919,7 +919,7 @@ topology:
           maxLatencyMillis: 150
         /make-payment:
           downstreamCalls:
-            - service: web
+            - service: ebank_web
               route: /submit-payment
           maxLatencyMillis: 300
         /payment-status:
@@ -929,21 +929,21 @@ topology:
           downstreamCalls:
             - service: api-gateway
               route: /api/requestLoan
-            - service: web
+            - service: ebank_web
               route: /loan-status
           maxLatencyMillis: 100
         /request-transfer-external:
           downstreamCalls:
             - service: api-gateway
               route: /api/requestTransferExternal
-            - service: web
+            - service: ebank_web
               route: /transfer-status
           maxLatencyMillis: 100
         /request-transfer-internal:
           downstreamCalls:
             - service: api-gateway
               route: /api/requestTransferInternal
-            - service: web
+            - service: ebank_web
               route: /transfer-status
           maxLatencyMillis: 100
         /search-product:
@@ -955,14 +955,14 @@ topology:
           downstreamCalls:
             - service: api-gateway
               route: /api/getPayment
-            - service: web
+            - service: ebank_web
               route: /payment-status
           maxLatencyMillis: 100
         /subscribe-product:
           downstreamCalls:
             - service: api-gateway
               route: /api/subscribeProduct
-            - service: web
+            - service: ebank_web
               route: /subscription-status
           maxLatencyMillis: 100
         /subscription-status:
@@ -1016,19 +1016,19 @@ flags:
       duration: 4m
 
 rootRoutes:
-  - service: android
+  - service: ebank_android
     route: /login
     tracesPerHour: 1200
-#  - service: android
+#  - service: ebank_android
 #    route: /make-payment
 #    tracesPerHour: 720
-  - service: iOS
+  - service: ebank_iOS
     route: /login
     tracesPerHour: 1800
-#  - service: iOS
+#  - service: ebank_iOS
 #    route: /make-payment
 #    tracesPerHour: 1200
-  - service: web
+  - service: ebank_web
     route: /login
     tracesPerHour: 900
   - service: api-gateway

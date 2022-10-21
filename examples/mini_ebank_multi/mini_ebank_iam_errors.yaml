@@ -142,7 +142,7 @@ topology:
         /getPrivileges:
           downstreamCalls:
           maxLatencyMillis: 200
-    iOS:
+    ebank_iOS:
       tagSets:
         - weight: 90
           flag_set: iam_errors
@@ -317,7 +317,7 @@ flags:
 
 
 rootRoutes:
-  - service: iOS
+  - service: ebank_iOS
     route: /login
     tracesPerHour: 1200
 
