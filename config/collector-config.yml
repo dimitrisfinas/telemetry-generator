@@ -28,13 +28,23 @@ processors:
 
 exporters:
   logging:
-  # Export to Lightstep Public Satellites
+  # Export to Lightstep Public Satellites for demo purpose
   otlp:
     endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}"
     insecure_skip_verify: true
     insecure: "${OTEL_INSECURE}"
     headers:
       "lightstep-access-token": "${LS_ACCESS_TOKEN}"
+    sending_queue:
+      num_consumers: 20
+      queue_size: 10000
+  # Export to Lightstep Public Satellites for SGC workshop
+  otlp/sgc:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}"
+    insecure_skip_verify: true
+    insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN_SGC}"
     sending_queue:
       num_consumers: 20
       queue_size: 10000
@@ -66,3 +76,4 @@ service:
       exporters:
       - logging
       - otlp
+      - otlp/sgc
