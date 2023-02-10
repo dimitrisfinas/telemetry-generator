@@ -1,0 +1,8 @@
+{
+  "data": {
+    "type": "stream",
+    "attributes": {
+      "name": "ServiceNow SGC",
+      "query": "service IN (\"IAM\", \"accountbalance\", \"ads\", \"api-gateway\", \"authentication\", \"ebank_android\", \"ebank_iOS\", \"ebank_web\", \"ext-api-gateway\", \"loan\", \"payment\", \"pingIdentity\", \"productcatalog\", \"recommendation\", \"subscription\", \"transfer-external\", \"transfer-internal\")",
+    },
+}

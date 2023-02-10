@@ -13,7 +13,7 @@
         * on the frontend services (`ebank_android`, `ebank_iOS`, `ebank_web`)
         * on the mainframe external services
         * small error rates are generated for more realistic values
-        * dashboards available in `./examples/mini_ebank_dashboards`
+        * dashboards available in `./examples/mini_ebank_assets/`
     - generate errors
         * every 30 minutes at 1.00, 1.30, ... and for 15 minutes, the IAM generates 100% errors for ebank_iOS
     - additional documentation available on `./docs/doc_mini_ebank.pptx`
@@ -21,6 +21,6 @@
 
 ## Extra Scenarios Available
 
-In `./examples/mini_ebank_multi/`, you will find an extra scenario allowing you to simulate an eBank with no errors (`mini_ebank_no_errors.yaml`) and then add the selected errors on demand from another injector:
+In `./examples/mini_ebank_assets/`, you will find an extra scenario allowing you to simulate an eBank with no errors (`mini_ebank_no_errors.yaml`) and then add the selected errors on demand from another injector:
 
 - use `mini_ebank_iam_errors.yaml` to generate ebank_iOS IAM errors
