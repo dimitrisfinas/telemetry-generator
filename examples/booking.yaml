@@ -1,7 +1,7 @@
 ## INFERRED SERVICE SETTING
 # In order to see the external APIs
 # in your Lightstep service map, you can use the following settings
-# Identify: transaction.external: "true"
+# Identify: transaction.external:true
 # Label: transaction.target
 
 topology:
