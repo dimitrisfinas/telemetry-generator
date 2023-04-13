@@ -1,0 +1,68 @@
+receivers:
+  # Generate traces from the given topology file (env var: TOPO_FILE)
+  generator:
+    path: "${TOPO_FILE}"
+    inline: "${TOPO_INLINE}"
+    api:
+      endpoint: 0.0.0.0:9999
+      cors_allowed_origins:
+        - '*'
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 5s
+          static_configs:
+            - targets: ['localhost:8888']
+          relabel_configs:
+          - replacement: "telemetry-generator"
+            target_label: "service"
+            action: replace
+
+processors:
+  batch:
+  spanmetrics:
+    metrics_exporter: otlp/sgc
+    dimensions:
+      - name: http.method
+
+exporters:
+  logging:
+  # Export to Lightstep Public Satellites for SGC workshop
+  otlp/sgc:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}"
+    insecure_skip_verify: true
+    insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN_SGC}"
+    sending_queue:
+      num_consumers: 20
+      queue_size: 10000
+  # export internal metrics to monitoring project
+  otlp/2:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT_INTERNAL}"
+    insecure_skip_verify: true
+    insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN_INTERNAL}"
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - generator
+      processors:
+      - batch
+#     - webhook
+      exporters:
+      - logging
+      - otlp/sgc
+    traces:
+      receivers:
+      - generator
+      processors:
+      - spanmetrics
+      - batch
+      exporters:
+      - logging
+      - otlp/sgc
