@@ -1,8 +1,8 @@
 ## INFERRED SERVICE SETTING
-# In order to see the mainframe external systems and external APIs
+# In order to see the external APIs
 # in your Lightstep service map, you can use the following settings
 # Identify: transaction.external: "true"
-# Label: transaction.region, transaction.target
+# Label: transaction.target
 
 topology:
   services:
@@ -176,15 +176,15 @@ topology:
             - service: authentication
               route: /logout
           maxLatencyMillis: 50
-        /api/getoffering:
-          downstreamCalls:
-            - service: offering-mgt
-              route: /getoffering
-          maxLatencyMillis: 100
         /api/getbooking:
           downstreamCalls:
             - service: offering-order
               route: /getbooking
+          maxLatencyMillis: 100
+        /api/getoffering:
+          downstreamCalls:
+            - service: offering-mgt
+              route: /getoffering
           maxLatencyMillis: 100
         /api/getpayments:
           downstreamCalls:
@@ -283,10 +283,15 @@ topology:
           maxLatencyMillis: 300
         /ext-api/searchBooking:
           tagSets:
-            - weight: 1
+            - weight: 50
               tags:
                 transfer.id: BOK913234567689884
-                transaction.target: ext-api-book
+                transaction.target: amadeus
+                transaction.type: API
+            - weight: 50
+              tags:
+                transfer.id: BOK91323456777957
+                transaction.target: sabre
                 transaction.type: API
           downstreamCalls:
             - service: ext-api-gateway
@@ -580,14 +585,14 @@ rootRoutes:
   - service: booking_front
     route: /logout
     tracesPerHour: 300
+  - service: booking_front
+    route: /make-booking
+    tracesPerHour: 300
 #  - service: booking_front
 #    route: /make-payments
-#    tracesPerHour: 720
+#    tracesPerHour: 120
   - service: api-gateway
     route: /api/getoffering
-    tracesPerHour: 600
-  - service: api-gateway
-    route: /api/getbooking
     tracesPerHour: 600
   - service: offering-mgt
     route: /getbooking
