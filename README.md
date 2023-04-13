@@ -18,6 +18,7 @@ export OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=ingest.lightstep.com:443
 ```shell
 docker run -e LS_ACCESS_TOKEN --rm ghcr.io/lightstep//telemetry-generator:latest
 ```
+
 ### OpenTelemetry collector builder
 Install the `opentelemetry-collector-builder`; this is deprecated but its replacement does not work with the old version of the collector we're still pinned to.
    1. `$ cd /tmp` (or wherever you like to keep code)
@@ -111,3 +112,15 @@ When building with Docker, you need to re-run both steps for any code *or* confi
 
 - getting error: `Error: failed to compile the OpenTelemetry Collector distribution: exit status 2. Output: "# github.com/lightstep/telemetry-generator/generatorreceiver/internal/topology\n../generatorreceiver/internal/topology/pickable.go:18:6: missing function body\n../generatorreceiver/internal/topology/pickable.go:18:23: syntax error: unexpected [, expecting (\n../generatorreceiver/internal/topology/pickable.go:20:2: syntax error: non-declaration statement outside function body\n../generatorreceiver/internal/topology/pickable.go:39:2: syntax error: non-declaration statement outside function body\nnote: module requires Go 1.18\n"`
   - upgrade to go version 1.18
+
+- getting error: `xcrun: error: invalid active developer path (/Library/Developer/CommandLineTools), missing xcrun at: /Library/Developer/CommandLineTools/usr/bin/xcrun`
+  - if on MAC OS, download and install the latest `Command line tools OS X` for your MACOS from site: https://developer.apple.com/download/all/
+
+- getting error: `make: builder: No such file or directory
+make: *** [build] Error 1`
+  - no solution found, except to reinstall and launch directly `make build` without installing the prerequiste first (as it is included in make build)
+
+
+- getting error `cannot use path@version syntax in GOPATH mode`
+  - Install latest version of go with instructions here https://nextgentips.com/2021/12/23/how-to-install-go-1-18-on-ubuntu-20-04/ (tested working with version 1.18)
+  - you may have to install wget for this to work using `sudo apt-get install wget`
