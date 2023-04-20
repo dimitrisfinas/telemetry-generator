@@ -284,6 +284,18 @@ topology:
         - weight: 1
           tags:
             service.version: 5.4.0
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 1
+              memory: 1024
+            limit:
+              cpu: 2
+              memory: 2048
+          resourceAttrs:
+            host.name: authentication-hostname
       routes:
         /getProfile:
           downstreamCalls:
@@ -412,6 +424,18 @@ topology:
           flag_unset: iam_errors
           tags:
             service.version: 3.3.5
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 2
+              memory: 4096
+            limit:
+              cpu: 2
+              memory: 4096
+          resourceAttrs:
+            host.name: IAM-hostname
       routes:
         /getPrivileges:
           downstreamCalls:
@@ -756,6 +780,18 @@ topology:
           tags:
             transfer.type: external
             service.version: 3.1.1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: transfer-ext-hostname
       routes:
         /checkCompliance:
           downstreamCalls:
@@ -809,6 +845,18 @@ topology:
           tags:
             transfer.type: internal
             service.version: 7.0.1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: transfer-int-hostname
       routes:
         /checkSourceAcctBalance:
           downstreamCalls:
