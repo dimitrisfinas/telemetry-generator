@@ -38,6 +38,33 @@ exporters:
     sending_queue:
       num_consumers: 20
       queue_size: 10000
+  # Export to Lightstep Public Satellites for SGC workshop
+  otlp/sgc:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}"
+    insecure_skip_verify: true
+    insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN_SGC}"
+    sending_queue:
+      num_consumers: 20
+      queue_size: 10000
+  # Export to Lightstep Public Satellites for new demo environment
+  otlp/new-demo:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}"
+    insecure_skip_verify: true
+    insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN_NEW_DEMO}"
+    sending_queue:
+      num_consumers: 20
+      queue_size: 10000
+  # export internal metrics to monitoring project
+  otlp/2:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT_INTERNAL}"
+    insecure_skip_verify: true
+    insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN_INTERNAL}"
 
 service:
   pipelines:
@@ -48,8 +75,8 @@ service:
       - batch
 #     - webhook
       exporters:
-      - logging
       - otlp
+      - logging
     traces:
       receivers:
       - generator
@@ -59,3 +86,5 @@ service:
       exporters:
       - logging
       - otlp
+      - otlp/sgc
+      - otlp/new

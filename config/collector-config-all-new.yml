@@ -1,0 +1,82 @@
+receivers:
+  # Generate traces from the given topology file (env var: TOPO_FILE)
+  generator:
+    path: "${TOPO_FILE}"
+    inline: "${TOPO_INLINE}"
+  prometheus:
+    config:
+      scrape_configs:
+        - job_name: 'otel-collector'
+          scrape_interval: 5s
+          static_configs:
+            - targets: ['localhost:8888']
+          relabel_configs:
+          - replacement: "telemetry-generator"
+            target_label: "service"
+            action: replace
+
+processors:
+  batch:
+  spanmetrics:
+    metrics_exporter: otlp
+    dimensions:
+      - name: http.method
+
+exporters:
+  logging:
+  # Export to Lightstep Old demo environment
+  otlp:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}"
+    tls:
+      insecure_skip_verify: true
+      insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN}"
+    sending_queue:
+      num_consumers: 20
+      queue_size: 10000
+  # export internal metrics to monitoring project
+  otlp/internal:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT_INTERNAL}"
+    tls:
+      insecure_skip_verify: true
+      insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN_INTERNAL}"
+  # Export to Lightstep New demo environment
+  otlp/new:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}"
+    tls:
+      insecure_skip_verify: true
+      insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN_NEW}"
+    sending_queue:
+      num_consumers: 20
+      queue_size: 10000
+  # Export to sgc-workshop account
+  otlp/sgc:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}"
+    tls:
+      insecure_skip_verify: true
+      insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN_SGC}"
+    sending_queue:
+      num_consumers: 20
+      queue_size: 10000
+
+service:
+  pipelines:
+    metrics:
+      receivers: [generator]
+      processors: [batch]
+      exporters: [logging, otlp, otlp/new, otlp/sgc]
+#pipeline for the collectors own internal metrics
+    metrics/internal:
+      receivers: [prometheus]
+      exporters: [otlp/internal]
+    traces:
+      receivers: [generator]
+      processors: [spanmetrics, batch]
+      exporters: [logging, otlp, otlp/new, otlp/sgc]
