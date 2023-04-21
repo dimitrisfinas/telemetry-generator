@@ -985,40 +985,40 @@ flags:
 rootRoutes:
   - service: ebank_android
     route: /login
-    tracesPerHour: 720
+    tracesPerHour: 72
 #  - service: ebank_android
 #    route: /make-payment
 #    tracesPerHour: 720
   - service: ebank_iOS
     route: /login
-    tracesPerHour: 900
+    tracesPerHour: 90
 #  - service: ebank_iOS
 #    route: /make-payment
 #    tracesPerHour: 1200
   - service: ebank_web
     route: /login
-    tracesPerHour: 600
+    tracesPerHour: 60
   - service: api-gateway
     route: /api/getAccountBalance
-    tracesPerHour: 600
+    tracesPerHour: 60
   - service: api-gateway
     route: /api/getPayment
-    tracesPerHour: 600
+    tracesPerHour: 60
   - service: api-gateway
     route: /api/requestLoan
-    tracesPerHour: 240
+    tracesPerHour: 24
   - service: api-gateway
     route: /api/requestTransferExternal
-    tracesPerHour: 240
+    tracesPerHour: 24
   - service: api-gateway
     route: /api/requestTransferInternal
-    tracesPerHour: 360
+    tracesPerHour: 36
   - service: api-gateway
     route: /api/searchProduct
-    tracesPerHour: 480
+    tracesPerHour: 48
   - service: api-gateway
     route: /api/subscribeProduct
-    tracesPerHour: 240
+    tracesPerHour: 24
 
 config:
   kubernetes:

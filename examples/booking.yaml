@@ -581,31 +581,31 @@ flags:
 rootRoutes:
   - service: booking_front
     route: /login
-    tracesPerHour: 1200
+    tracesPerHour: 120
   - service: booking_front
     route: /logout
-    tracesPerHour: 300
+    tracesPerHour: 30
   - service: booking_front
     route: /make-booking
-    tracesPerHour: 300
+    tracesPerHour: 30
 #  - service: booking_front
 #    route: /make-payments
 #    tracesPerHour: 120
   - service: api-gateway
     route: /api/getoffering
-    tracesPerHour: 600
+    tracesPerHour: 60
   - service: offering-mgt
     route: /getbooking
-    tracesPerHour: 240
+    tracesPerHour: 24
   - service: offering-mgt
     route: /getPayments
-    tracesPerHour: 240
+    tracesPerHour: 24
   - service: offering-mgt
     route: /getReservations
-    tracesPerHour: 240
+    tracesPerHour: 24
   - service: offering-mgt
     route: /getOrders
-    tracesPerHour: 360
+    tracesPerHour: 36
 
 config:
   kubernetes:

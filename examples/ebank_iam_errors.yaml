@@ -320,7 +320,7 @@ flags:
 rootRoutes:
   - service: ebank_iOS
     route: /login
-    tracesPerHour: 1200
+    tracesPerHour: 120
 
 config:
   kubernetes:
