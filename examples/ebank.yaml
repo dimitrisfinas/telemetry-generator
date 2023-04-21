@@ -136,55 +136,6 @@ topology:
         /Ad:
           downstreamCalls:
           maxLatencyMillis: 200
-    ebank_android:
-      tagSets:
-        - weight: 1
-          tags:
-            span.kind: client
-      resourceAttrSets:
-        - weight: 1
-          resourceAttrs:
-            client.platform: android
-            http.method: POST
-            instrumentation.name: lightstep
-            service.version: 6.12.231
-      metrics:
-        - name: requests
-          type: Sum
-          max: 400
-          min: 0
-          period: 5m
-          shape: triangle
-      routes:
-        /login:
-          tagSets:
-            - weight: 99
-              tags:
-            - weight: 1
-              tags:
-                error: true
-                error.message: "ERROR: bad login or password"
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/login
-            - service: ads
-              route: /AdRequest
-          maxLatencyMillis: 100
-        /make-payment:
-          downstreamCalls:
-            - service: ebank_android
-              route: /submit-payment
-          maxLatencyMillis: 100
-        /payment-status:
-          downstreamCalls:
-          maxLatencyMillis: 100
-        /submit-payment:
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/getPayment
-            - service: ebank_android
-              route: /payment-status
-          maxLatencyMillis: 100
     api-gateway:
       tagSets:
         - weight: 1
@@ -312,6 +263,242 @@ topology:
         /logout:
           downstreamCalls:
           maxLatencyMillis: 100
+    ebank_android:
+      tagSets:
+        - weight: 1
+          tags:
+            span.kind: client
+      resourceAttrSets:
+        - weight: 1
+          resourceAttrs:
+            client.platform: android
+            cluster_name: k8s-cluster-1
+            http.method: POST
+            instrumentation.name: lightstep
+            service.version: 6.12.231
+      metrics:
+        - name: requests
+          type: Sum
+          max: 400
+          min: 0
+          period: 5m
+          shape: triangle
+      routes:
+        /login:
+          tagSets:
+            - weight: 99
+              tags:
+            - weight: 1
+              tags:
+                error: true
+                error.message: "ERROR: bad login or password"
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/login
+            - service: ads
+              route: /AdRequest
+          maxLatencyMillis: 100
+        /make-payment:
+          downstreamCalls:
+            - service: ebank_android
+              route: /submit-payment
+          maxLatencyMillis: 100
+        /payment-status:
+          downstreamCalls:
+          maxLatencyMillis: 100
+        /submit-payment:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/getPayment
+            - service: ebank_android
+              route: /payment-status
+          maxLatencyMillis: 100
+    ebank_iOS:
+      tagSets:
+        - weight: 90
+          flag_set: iam_errors
+          tags:
+            error: true
+            error.message: "ERROR: unable to login"
+            service.version: 5.4.231
+        - weight: 10
+          flag_unset: iam_errors
+          tags:
+            service.version: 5.4.231
+      resourceAttrSets:
+        - weight: 1
+          resourceAttrs:
+            client.platform: iOS
+            cluster_name: k8s-cluster-1
+            http.method: POST
+            instrumentation.name: lightstep
+      metrics:
+        - name: requests
+          type: Sum
+          max: 400
+          min: 0
+          period: 5m
+          shape: triangle
+      routes:
+        /login:
+          tagSets:
+            - weight: 99
+              flag_unset: iam_errors
+              tags:
+            - weight: 1
+              flag_unset: iam_errors
+              tags:
+                error: true
+                error.message: "ERROR: bad login or password"
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/login
+            - service: ads
+              route: /AdRequest
+          maxLatencyMillis: 100
+        /make-payment:
+          downstreamCalls:
+            - service: ebank_iOS
+              route: /submit-payment
+          flag_unset: iam_errors
+          maxLatencyMillis: 100
+        /submit-payment:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/getPayment
+            - service: ebank_iOS
+              route: /payment-status
+          flag_unset: iam_errors
+          maxLatencyMillis: 100
+        /payment-status:
+          flag_unset: iam_errors
+          downstreamCalls:
+          maxLatencyMillis: 100
+    ebank_web:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 1.2.5
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-23
+            pod_count: 7
+            restart:
+              every: 10m
+              jitter: 2m
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-east-1
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            restart:
+              every: 5m
+          resourceAttrs:
+            cloud.provider: aws
+            cloud.region: us-west-2
+      routes:
+        /account-balance:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/getAccountBalance
+          maxLatencyMillis: 1000
+        /loan-status:
+          downstreamCalls:
+          maxLatencyMillis: 500
+        /login:
+          tagSets:
+            - weight: 98
+              tags:
+            - weight: 2
+              tags:
+                error: true
+                error.message: "ERROR: bad login or password"
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/login
+            - service: ads
+              route: /AdRequest
+          maxLatencyMillis: 300
+        /logout:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/logout
+          maxLatencyMillis: 150
+        /make-payment:
+          downstreamCalls:
+            - service: ebank_web
+              route: /submit-payment
+          maxLatencyMillis: 300
+        /payment-status:
+          downstreamCalls:
+          maxLatencyMillis: 500
+        /request-loan:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/requestLoan
+            - service: ebank_web
+              route: /loan-status
+          maxLatencyMillis: 100
+        /request-transfer-external:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/requestTransferExternal
+            - service: ebank_web
+              route: /transfer-status
+          maxLatencyMillis: 100
+        /request-transfer-internal:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/requestTransferInternal
+            - service: ebank_web
+              route: /transfer-status
+          maxLatencyMillis: 100
+        /search-product:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/searchProduct
+          maxLatencyMillis: 300
+        /submit-payment:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/getPayment
+            - service: ebank_web
+              route: /payment-status
+          maxLatencyMillis: 100
+        /subscribe-product:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/subscribeProduct
+            - service: ebank_web
+              route: /subscription-status
+          maxLatencyMillis: 100
+        /subscription-status:
+          downstreamCalls:
+          maxLatencyMillis: 500
+        /transfer-status:
+          downstreamCalls:
+          maxLatencyMillis: 500
     ext-api-gateway:
       tagSets:
         - weight: 1
@@ -440,66 +627,6 @@ topology:
         /getPrivileges:
           downstreamCalls:
           maxLatencyMillis: 200
-    ebank_iOS:
-      tagSets:
-        - weight: 90
-          flag_set: iam_errors
-          tags:
-            error: true
-            error.message: "ERROR: unable to login"
-            service.version: 5.4.231
-        - weight: 10
-          flag_unset: iam_errors
-          tags:
-            service.version: 5.4.231
-      resourceAttrSets:
-        - weight: 1
-          resourceAttrs:
-            instrumentation.name: lightstep
-            http.method: POST
-            client.platform: iOS
-      metrics:
-        - name: requests
-          type: Sum
-          max: 400
-          min: 0
-          period: 5m
-          shape: triangle
-      routes:
-        /login:
-          tagSets:
-            - weight: 99
-              flag_unset: iam_errors
-              tags:
-            - weight: 1
-              flag_unset: iam_errors
-              tags:
-                error: true
-                error.message: "ERROR: bad login or password"
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/login
-            - service: ads
-              route: /AdRequest
-          maxLatencyMillis: 100
-        /make-payment:
-          downstreamCalls:
-            - service: ebank_iOS
-              route: /submit-payment
-          flag_unset: iam_errors
-          maxLatencyMillis: 100
-        /submit-payment:
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/getPayment
-            - service: ebank_iOS
-              route: /payment-status
-          flag_unset: iam_errors
-          maxLatencyMillis: 100
-        /payment-status:
-          flag_unset: iam_errors
-          downstreamCalls:
-          maxLatencyMillis: 100
     loan:
       tagSets:
         - weight: 1
@@ -894,131 +1021,6 @@ topology:
             - service: transfer-internal
               route: /getTransferStatus
           maxLatencyMillis: 100
-    ebank_web:
-      tagSets:
-        - weight: 1
-          tags:
-            service.version: 1.2.5
-      resourceAttrSets:
-        - weight: 1
-          kubernetes:
-            pod_count: 7
-            restart:
-              every: 10m
-              jitter: 2m
-            cluster_name: k8s-cluster-23
-            request:
-              cpu: 0.5
-              memory: 2048
-            limit:
-              cpu: 0.75
-              memory: 3072
-            usage:
-              cpu:
-                target: 0.5
-                jitter: 0.5
-              memory:
-                target: 0.6
-                jitter: 0.4
-          resourceAttrs:
-            cloud.provider: aws
-            cloud.region: us-east-1
-        - weight: 1
-          kubernetes:
-            cluster_name: k8s-cluster-1
-            request:
-              cpu: 0.5
-              memory: 2048
-            limit:
-              cpu: 0.75
-              memory: 3072
-            restart:
-              every: 5m
-          resourceAttrs:
-            cloud.provider: aws
-            cloud.region: us-west-2
-      routes:
-        /account-balance:
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/getAccountBalance
-          maxLatencyMillis: 1000
-        /loan-status:
-          downstreamCalls:
-          maxLatencyMillis: 500
-        /login:
-          tagSets:
-            - weight: 98
-              tags:
-            - weight: 2
-              tags:
-                error: true
-                error.message: "ERROR: bad login or password"
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/login
-            - service: ads
-              route: /AdRequest
-          maxLatencyMillis: 300
-        /logout:
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/logout
-          maxLatencyMillis: 150
-        /make-payment:
-          downstreamCalls:
-            - service: ebank_web
-              route: /submit-payment
-          maxLatencyMillis: 300
-        /payment-status:
-          downstreamCalls:
-          maxLatencyMillis: 500
-        /request-loan:
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/requestLoan
-            - service: ebank_web
-              route: /loan-status
-          maxLatencyMillis: 100
-        /request-transfer-external:
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/requestTransferExternal
-            - service: ebank_web
-              route: /transfer-status
-          maxLatencyMillis: 100
-        /request-transfer-internal:
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/requestTransferInternal
-            - service: ebank_web
-              route: /transfer-status
-          maxLatencyMillis: 100
-        /search-product:
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/searchProduct
-          maxLatencyMillis: 300
-        /submit-payment:
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/getPayment
-            - service: ebank_web
-              route: /payment-status
-          maxLatencyMillis: 100
-        /subscribe-product:
-          downstreamCalls:
-            - service: api-gateway
-              route: /api/subscribeProduct
-            - service: ebank_web
-              route: /subscription-status
-          maxLatencyMillis: 100
-        /subscription-status:
-          downstreamCalls:
-          maxLatencyMillis: 500
-        /transfer-status:
-          downstreamCalls:
-          maxLatencyMillis: 500
 
 flags:
   # This is a cron-style flag
