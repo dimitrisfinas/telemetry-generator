@@ -314,6 +314,7 @@ flags:
     cron:
 # Every Minutes and with no duration, so will last until incident finished
       start: "* * * * *"
+      end: ""
 
 
 rootRoutes:
