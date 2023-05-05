@@ -11,9 +11,16 @@ topology:
         - weight: 1
           tags:
             account.id: 123456789
+            k8s.cluster.name: k8s-cluster-6
+            k8s.container.name: accountbalance-aef345da1
+            k8s.deployment.name: accountbalance
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-9533970e-b6km
+            k8s.node.uid: 008967fd-c08c-9364-47a3-846ced892902
+            k8s.pod.name: accountbalance-adf-52a2
             region: us-east-1
+            service.version: 10.3.236
             transaction.external: true
-            service.version: 10.3.234
       resourceAttrSets:
         - weight: 1
           kubernetes:
@@ -91,12 +98,19 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            service.version: 3.7.1
+            k8s.cluster.name: k8s-cluster-1
+            k8s.container.name: ads-kjtf1234
+            k8s.deployment.name: ads
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-9533970e-v3wf
+            k8s.node.uid: 182a6f58-4b39-96aa-32ef-f1c7f41066ca
+            k8s.pod.name: ads-bgf-ad124f
+            service.version: 3.7.3
             region: us-east-1
       resourceAttrSets:
         - weight: 1
           kubernetes:
-            cluster_name: k8s-cluster-10
+            cluster_name: k8s-cluster-1
             request:
               cpu: 0.5
               memory: 512
@@ -140,7 +154,24 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            service.version: 1.0.0
+            k8s.cluster.name: k8s-cluster-6
+            k8s.container.name: api-gateway-hgf56
+            k8s.deployment.name: api-gateway
+            k8s.namespace.name: shared
+            k8s.node.name: gke-shared-pool-1he3970e-a784
+            k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
+            k8s.pod.name: api-gateway-gf5-bc1d4f
+            service.version: 1.1.0
+        - weight: 1
+          tags:
+            k8s.cluster.name: k8s-cluster-1
+            k8s.container.name: api-gateway-aer41fe
+            k8s.deployment.name: api-gateway
+            k8s.namespace.name: shared
+            k8s.node.name: gke-shared-pool-1233970e-abe4
+            k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
+            k8s.pod.name: api-gateway-bgf-ad124f
+            service.version: 1.1.0
       resourceAttrSets:
         - weight: 1
           kubernetes:
@@ -148,7 +179,7 @@ topology:
             restart:
               every: 10m
               jitter: 2m
-            cluster_name: k8s-cluster-23
+            cluster_name: k8s-cluster-6
             request:
               cpu: 0.5
               memory: 2048
@@ -234,7 +265,14 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            service.version: 5.4.0
+            k8s.cluster.name: k8s-cluster-1
+            k8s.container.name: authentication-c45f24
+            k8s.deployment.name: authentication
+            k8s.namespace.name: shared
+            k8s.node.name: gke-shared-pool-1233970e-abe4
+            k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
+            k8s.pod.name: authentication-bgf-abe321
+            service.version: 5.4.1
       resourceAttrSets:
         - weight: 1
           kubernetes:
@@ -267,6 +305,13 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            k8s.cluster.name: k8s-cluster-1
+            k8s.container.name: ebank_android-aer41fe
+            k8s.deployment.name: ebank_android
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-9533970e-v3wf
+            k8s.node.uid: 182a6f58-4b39-96aa-32ef-f1c7f41066ca
+            k8s.pod.name: ebank_android-ac1-a23bc4
             span.kind: client
       resourceAttrSets:
         - weight: 1
@@ -320,11 +365,25 @@ topology:
           tags:
             error: true
             error.message: "ERROR: unable to login"
-            service.version: 5.4.231
+            k8s.cluster.name: k8s-cluster-1
+            k8s.container.name: ebank_iOS-ab766c
+            k8s.deployment.name: ebank_iOS
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-9533970e-v3wf
+            k8s.node.uid: 182a6f58-4b39-96aa-32ef-f1c7f41066ca
+            k8s.pod.name: ebank_iOS-123-1def45c
+            service.version: 5.4.240
         - weight: 10
           flag_unset: iam_errors
           tags:
-            service.version: 5.4.231
+            k8s.cluster.name: k8s-cluster-1
+            k8s.container.name: ebank_iOS-ab766c
+            k8s.deployment.name: ebank_iOS
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-9533970e-v3wf
+            k8s.node.uid: 182a6f58-4b39-96aa-32ef-f1c7f41066ca
+            k8s.pod.name: ebank_iOS-123-1def45c
+            service.version: 5.4.240
       resourceAttrSets:
         - weight: 1
           resourceAttrs:
@@ -378,11 +437,18 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            k8s.cluster.name: k8s-cluster-1
+            k8s.container.name: ebank_web-ab766c
+            k8s.deployment.name: ebank_web
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-787ae668-ab47e
+            k8s.node.uid: bf2c6f77-1239-69aa-32ef-abc7f990c6ca
+            k8s.pod.name: ebank_web-43ca-99dc6f
             service.version: 1.2.5
       resourceAttrSets:
         - weight: 1
           kubernetes:
-            cluster_name: k8s-cluster-23
+            cluster_name: k8s-cluster-6
             pod_count: 7
             restart:
               every: 10m
@@ -503,6 +569,13 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            k8s.cluster.name: k8s-cluster-6
+            k8s.container.name: ext-api-gateway-abc12
+            k8s.deployment.name: ext-api-gateway
+            k8s.namespace.name: shared
+            k8s.node.name: gke-shared-pool-1he3970e-a784
+            k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
+            k8s.pod.name: ext-api-gateway-abc-de1234
             transaction.external: true
             service.version: 1.0.0
       resourceAttrSets:
@@ -512,7 +585,7 @@ topology:
             restart:
               every: 10m
               jitter: 2m
-            cluster_name: k8s-cluster-23
+            cluster_name: k8s-cluster-6
             request:
               cpu: 0.5
               memory: 2048
@@ -604,12 +677,26 @@ topology:
         - weight: 90
           flag_set: iam_errors
           tags:
-            service.version: 3.4.0
             error: true
             error.message: "CRITICAL: can't access profile"
+            k8s.cluster.name: k8s-cluster-1
+            k8s.container.name: iam-c45f24
+            k8s.deployment.name: iam
+            k8s.namespace.name: shared
+            k8s.node.name: gke-shared-pool-1233970e-abe4
+            k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
+            k8s.pod.name: iam-cdf-cbe771
+            service.version: 3.4.0
         - weight: 10
           flag_unset: iam_errors
           tags:
+            k8s.cluster.name: k8s-cluster-1
+            k8s.container.name: iam-c45f24
+            k8s.deployment.name: iam
+            k8s.namespace.name: shared
+            k8s.node.name: gke-shared-pool-1233970e-abe4
+            k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
+            k8s.pod.name: iam-cdf-cbe771
             service.version: 3.3.5
       resourceAttrSets:
         - weight: 1
@@ -631,6 +718,13 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            k8s.cluster.name: k8s-cluster-6
+            k8s.container.name: loan-de3f65da6
+            k8s.deployment.name: loan
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-9533970e-b6km
+            k8s.node.uid: 008967fd-c08c-9364-47a3-846ced892902
+            k8s.pod.name: loan-de3-52a2
             service.version: 10.4.214
       routes:
         /checkBlacklist:
@@ -727,8 +821,15 @@ topology:
       tagSets:
         - weight: 1
           tags:
-            service.version: 1.7.7
+            k8s.cluster.name: k8s-cluster-6
+            k8s.container.name: payment-aa5678f6
+            k8s.deployment.name: payment
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-9533970e-b6km
+            k8s.node.uid: 008967fd-c08c-9364-47a3-846ced892902
+            k8s.pod.name: payment-aa3-c2a2
             region: us-east-1
+            service.version: 1.7.7
       resourceAttrSets:
         - weight: 1
           kubernetes:
@@ -772,6 +873,13 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            k8s.cluster.name: k8s-cluster-1
+            k8s.container.name: pingidentity-eef24
+            k8s.deployment.name: pingidentity
+            k8s.namespace.name: shared
+            k8s.node.name: gke-shared-pool-1233970e-abe4
+            k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
+            k8s.pod.name: pingidentity-19f-99be771
             service.version: 1.1.0
       resourceAttrSets:
         - weight: 1
@@ -808,9 +916,16 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            k8s.cluster.name: k8s-cluster-2
+            k8s.container.name: productcatalog-bc345f2
+            k8s.deployment.name: productcatalog
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-2487abf-c345
+            k8s.node.uid: 901237ed-ab87-9c64-4713-99c8af9901
+            k8s.pod.name: productcatalog-124-1287ab
             service.version: 5.2
           tagGenerators:
-            - numTags: 20
+            - numTags: 10
               numVals: 3000
               valLength: 16
           inherit:
@@ -857,12 +972,19 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            k8s.cluster.name: k8s-cluster-2
+            k8s.container.name: recommendation-bc345f2
+            k8s.deployment.name: recommendation
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-2487abf-c345
+            k8s.node.uid: 901237ed-ab87-9c64-4713-99c8af9901
+            k8s.pod.name: recommendation-124-1287ab
             service.version: 2.3.432
             region: us-east-1
       resourceAttrSets:
         - weight: 1
           kubernetes:
-            cluster_name: k8s-cluster-3
+            cluster_name: k8s-cluster-2
             request:
               cpu: 0.5
               memory: 512
@@ -894,6 +1016,13 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            k8s.cluster.name: k8s-cluster-2
+            k8s.container.name: subscription-ab345
+            k8s.deployment.name: subscription
+            k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-2487abf-c345
+            k8s.node.uid: 901237ed-ab87-1264-ab99-19c8af975
+            k8s.pod.name: subscription-123a-1254ff
             service.version: 1.0.0
       routes:
         /subscribeProduct:
@@ -905,6 +1034,13 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            k8s.cluster.name: k8s-cluster-6
+            k8s.container.name: transfer-external-sf23d1
+            k8s.deployment.name: transfer-external
+            k8s.namespace.name: shared
+            k8s.node.name: gke-shared-pool-1he3970e-a784
+            k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
+            k8s.pod.name: transfer-external-a124-ff1234
             transfer.type: external
             service.version: 3.1.1
       resourceAttrSets:
@@ -970,6 +1106,13 @@ topology:
       tagSets:
         - weight: 1
           tags:
+            k8s.cluster.name: k8s-cluster-6
+            k8s.container.name: transfer-internal-a121cd
+            k8s.deployment.name: transfer-internal
+            k8s.namespace.name: shared
+            k8s.node.name: gke-shared-pool-1he3970e-a784
+            k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
+            k8s.pod.name: transfer-internal-bf342-123405e
             transfer.type: internal
             service.version: 7.0.1
       resourceAttrSets:
