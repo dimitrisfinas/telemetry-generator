@@ -304,6 +304,7 @@ topology:
     ebank_android:
       tagSets:
         - weight: 1
+          flag_unset: iam_errors
           tags:
             k8s.cluster.name: k8s-cluster-1
             k8s.container.name: ebank_android-aer41fe
@@ -332,8 +333,10 @@ topology:
         /login:
           tagSets:
             - weight: 99
+              flag_unset: iam_errors
               tags:
             - weight: 1
+              flag_unset: iam_errors
               tags:
                 error: true
                 error.message: "ERROR: bad login or password"
@@ -436,6 +439,7 @@ topology:
     ebank_web:
       tagSets:
         - weight: 1
+          flag_unset: iam_errors
           tags:
             k8s.cluster.name: k8s-cluster-1
             k8s.container.name: ebank_web-ab766c
@@ -495,8 +499,10 @@ topology:
         /login:
           tagSets:
             - weight: 98
+              flag_unset: iam_errors
               tags:
             - weight: 2
+              flag_unset: iam_errors
               tags:
                 error: true
                 error.message: "ERROR: bad login or password"
@@ -1167,14 +1173,15 @@ topology:
 
 flags:
   # This is a cron-style flag
-  - name: iam_errors
     # use https://crontab.guru/
+  - name: iam_errors
     cron:
-# Every 5 Minutes
-#      start: "0,10,20,30,40,50 * * * *"
-#      end: "5,15,25,35,45,55 * * * *"
       start: "0,30 * * * *"
       end: "15,45 * * * *"
+  - name: web_latency
+    cron:
+      start: "0,10,20,30,40,50 * * * *"
+      end: "5,15,25,35,45,55 * * * *"
   - name: runs_on_azure
   - name: sev0_total_failure
   - name: database_outage
