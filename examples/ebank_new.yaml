@@ -1,0 +1,1165 @@
+## INFERRED SERVICE SETTING
+# In order to see the mainframe external systems and external APIs
+# in your Lightstep service map, you can use the following settings
+# Identify: transaction.external: "true"
+# Label: transaction.region, transaction.target
+
+topology:
+  services:
+    accountbalance:
+      tagSets:
+        - weight: 1
+          tags:
+            account.id: 123456789
+            region: us-east-1
+            service.version: 10.3.236
+            transaction.external: true
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: accountbalance-host
+            # these 2 tags are ignored due to cluster_name generating them with other values
+            # k8s.deployment.name: accountbalance
+            # k8s.namespace.name: ebank
+            k8s.node.name: gke-ebank-pool-9533970e-b6km
+            k8s.node.uid: 008967fd-c08c-9364-47a3-846ced892902
+      routes:
+        /getAccountBalance:
+          downstreamCalls:
+            - service: accountbalance
+              route: /getAccountHistory
+            - service: accountbalance
+              route: /getBalance
+            - service: accountbalance
+              route: /getIncomingOperations
+          maxLatencyMillis: 1000
+        /getAccountHistory:
+          tagSets:
+            - weight: 99
+              tags:
+                db2.transid: HIST
+                transaction.id: HISTNFDLZ13253KDF23
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: DB2
+            - weight: 1
+              tags:
+                db2.transid: HIST
+                error: true
+                error.message: "ERROR: transaction unreachable, retry later"
+                transaction.id: HISTNFDLZ13253KDF23
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: DB2
+          downstreamCalls:
+          maxLatencyMillis: 500
+        /getBalance:
+          tagSets:
+            - weight: 99
+              tags:
+                cics.transid: ACTB
+                transaction.id: ACTBHSDDS21324536
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
+            - weight: 1
+              tags:
+                cics.transid: ACTB
+                error: true
+                error.message: "ERROR: transaction unreachable, retry later"
+                transaction.id: ACTBHSDDS21324536
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
+          downstreamCalls:
+          maxLatencyMillis: 100
+        /getIncomingOperations:
+          tagSets:
+            - weight: 1
+              tags:
+                cics.transid: INCO
+                transaction.id: INCO203958238328823
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
+          downstreamCalls:
+          maxLatencyMillis: 300
+    ads:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 3.7.3
+            region: us-east-1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: ads-host
+            k8s.node.name: gke-ebank-pool-9533970e-v3wf
+            k8s.node.uid: 182a6f58-4b39-96aa-32ef-f1c7f41066ca
+      routes:
+        /AdRequest:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/getRecommendations
+            - service: ads
+              route: /Ad
+          latencyConfigs:
+            - flag_set: ads_bug.slow
+              p0: 60ms
+              p50: 200ms
+              p95: 340ms
+              p99: 400ms
+              p99.9: 600ms
+              p100: 1000ms
+            - flag_set: ads_bug.slower
+              p0: 80ms
+              p50: 250ms
+              p95: 400ms
+              p99: 600ms
+              p99.9: 900ms
+              p100: 1200ms
+            - p0: 25ms
+              p50: 75ms
+              p95: 100ms
+              p99: 120ms
+              p99.9: 150ms
+              p100: 200ms
+        /Ad:
+          downstreamCalls:
+          maxLatencyMillis: 200
+    api-gateway:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 1.1.0
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+            pod_count: 5
+            restart:
+              every: 10m
+              jitter: 2m
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: gcp
+            cloud.region: us-east-1
+            k8s.node.name: gke-shared-pool-1he3970e-a784
+            k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
+            k8s.replicaset.name: gke-shared-api-gateway-6d4f58c489
+            k8s.replicaset.uid: 97844e33-6add-4725-b50b-15eb5ed14f0d
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            pod_count: 5
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            restart:
+              every: 5m
+          resourceAttrs:
+            cloud.provider: gcp
+            cloud.region: us-west-2
+            k8s.node.name: gke-shared-pool-1233970e-abe4
+            k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
+            k8s.replicaset.name: gke-shared-api-gateway-123f98750de
+            k8s.replicaset.uid: 125845-6fe4-4725-b50c-18feb5ac14147
+      routes:
+        /api/login:
+          downstreamCalls:
+            - service: authentication
+              route: /login
+          maxLatencyMillis: 100
+        /api/logout:
+          downstreamCalls:
+            - service: authentication
+              route: /logout
+          maxLatencyMillis: 100
+        /api/getAccountBalance:
+          downstreamCalls:
+            - service: accountbalance
+              route: /getAccountBalance
+          maxLatencyMillis: 100
+        /api/getPayment:
+          downstreamCalls:
+            - service: payment
+              route: /CardPayment
+          maxLatencyMillis: 100
+        /api/getRecommendations:
+          downstreamCalls:
+            - service: recommendation
+              route: /getRecommendations
+          maxLatencyMillis: 100
+        /api/requestLoan:
+          downstreamCalls:
+            - service: loan
+              route: /requestLoan
+          maxLatencyMillis: 100
+        /api/requestTransferExternal:
+          downstreamCalls:
+            - service: transfer-external
+              route: /requestTransfer
+          maxLatencyMillis: 100
+        /api/requestTransferInternal:
+          downstreamCalls:
+            - service: transfer-internal
+              route: /requestTransfer
+          maxLatencyMillis: 100
+        /api/searchProduct:
+          downstreamCalls:
+            - service: productcatalog
+              route: /searchProduct
+          maxLatencyMillis: 100
+        /api/subscribeProduct:
+          downstreamCalls:
+            - service: subscription
+              route: /subscribeProduct
+          maxLatencyMillis: 100
+    authentication:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 5.4.1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            pod_count: 4
+            request:
+              cpu: 1
+              memory: 1024
+            limit:
+              cpu: 2
+              memory: 2048
+          resourceAttrs:
+            host.name: authentication-host
+            k8s.node.name: gke-shared-pool-1233970e-abe4
+            k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
+            k8s.replicaset.name: gke-shared-authentication-123f9875a99
+            k8s.replicaset.uid: 878555-99e4-1234-afe4-9978b5ac14121
+      routes:
+        /getProfile:
+          downstreamCalls:
+            - service: IAM
+              route: /getPrivileges
+          maxLatencyMillis: 300
+        /login:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /detect
+            - service: authentication
+              route: /getProfile
+          maxLatencyMillis: 100
+        /logout:
+          downstreamCalls:
+          maxLatencyMillis: 100
+    ebank_android:
+      tagSets:
+        - weight: 1
+          tags:
+            span.kind: client
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            pod_count: 3
+          resourceAttrs:
+            client.platform: android
+            http.method: POST
+            instrumentation.name: lightstep
+            k8s.node.name: gke-ebank-pool-9533970e-v3wf
+            k8s.node.uid: 182a6f58-4b39-96aa-32ef-f1c7f41066ca
+            k8s.replicaset.name: gke-ebank-android-99a34fe456
+            k8s.replicaset.uid: 125478-1000-4834-ace4-932c75ac14121
+            service.version: 6.12.232
+      metrics:
+        - name: requests
+          type: Sum
+          max: 400
+          min: 0
+          period: 5m
+          shape: triangle
+      routes:
+        /login:
+          tagSets:
+            - weight: 99
+              tags:
+            - weight: 1
+              tags:
+                error: true
+                error.message: "ERROR: bad login or password"
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/login
+            - service: ads
+              route: /AdRequest
+          maxLatencyMillis: 100
+        /make-payment:
+          downstreamCalls:
+            - service: ebank_android
+              route: /submit-payment
+          maxLatencyMillis: 100
+        /payment-status:
+          downstreamCalls:
+          maxLatencyMillis: 100
+        /submit-payment:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/getPayment
+            - service: ebank_android
+              route: /payment-status
+          maxLatencyMillis: 100
+    ebank_iOS:
+      tagSets:
+        - weight: 90
+          flag_set: iam_errors
+          tags:
+            error: true
+            error.message: "ERROR: unable to login"
+            service.version: 5.4.240
+        - weight: 10
+          flag_unset: iam_errors
+          tags:
+            service.version: 5.4.240
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            pod_count: 3
+          resourceAttrs:
+            client.platform: iOS
+            http.method: POST
+            instrumentation.name: lightstep
+            k8s.node.name: gke-ebank-pool-9643970e-a234
+            k8s.node.uid: 177a6f58-4b39-69bc-3201-a745899fe4
+            k8s.replicaset.name: gke-ebank-iOS-99a34fe456
+            k8s.replicaset.uid: 125478-1000-4834-ace4-932c75ac14121
+      metrics:
+        - name: requests
+          type: Sum
+          max: 400
+          min: 0
+          period: 5m
+          shape: triangle
+      routes:
+        /login:
+          tagSets:
+            - weight: 99
+              flag_unset: iam_errors
+              tags:
+            - weight: 1
+              flag_unset: iam_errors
+              tags:
+                error: true
+                error.message: "ERROR: bad login or password"
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/login
+            - service: ads
+              route: /AdRequest
+          maxLatencyMillis: 100
+        /make-payment:
+          downstreamCalls:
+            - service: ebank_iOS
+              route: /submit-payment
+          flag_unset: iam_errors
+          maxLatencyMillis: 100
+        /submit-payment:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/getPayment
+            - service: ebank_iOS
+              route: /payment-status
+          flag_unset: iam_errors
+          maxLatencyMillis: 100
+        /payment-status:
+          flag_unset: iam_errors
+          downstreamCalls:
+          maxLatencyMillis: 100
+    ebank_web:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 1.2.5
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            pod_count: 3
+            restart:
+              every: 10m
+              jitter: 2m
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: gcp
+            cloud.region: us-east-1
+            k8s.node.name: gke-ebank-pool-787ae668-ab47e
+            k8s.node.uid: bf2c6f77-1239-69aa-32ef-abc7f990c6ca
+            k8s.replicaset.name: gke-ebank-web-112ba999456
+            k8s.replicaset.uid: 99f458c-20a0-4966-ab45-999c75ec6411
+      routes:
+        /account-balance:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/getAccountBalance
+          maxLatencyMillis: 1000
+        /loan-status:
+          downstreamCalls:
+          maxLatencyMillis: 500
+        /login:
+          tagSets:
+            - weight: 98
+              tags:
+            - weight: 2
+              tags:
+                error: true
+                error.message: "ERROR: bad login or password"
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/login
+            - service: ads
+              route: /AdRequest
+          maxLatencyMillis: 300
+        /logout:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/logout
+          maxLatencyMillis: 150
+        /make-payment:
+          downstreamCalls:
+            - service: ebank_web
+              route: /submit-payment
+          maxLatencyMillis: 300
+        /payment-status:
+          downstreamCalls:
+          maxLatencyMillis: 500
+        /request-loan:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/requestLoan
+            - service: ebank_web
+              route: /loan-status
+          maxLatencyMillis: 100
+        /request-transfer-external:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/requestTransferExternal
+            - service: ebank_web
+              route: /transfer-status
+          maxLatencyMillis: 100
+        /request-transfer-internal:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/requestTransferInternal
+            - service: ebank_web
+              route: /transfer-status
+          maxLatencyMillis: 100
+        /search-product:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/searchProduct
+          maxLatencyMillis: 300
+        /submit-payment:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/getPayment
+            - service: ebank_web
+              route: /payment-status
+          maxLatencyMillis: 100
+        /subscribe-product:
+          downstreamCalls:
+            - service: api-gateway
+              route: /api/subscribeProduct
+            - service: ebank_web
+              route: /subscription-status
+          maxLatencyMillis: 100
+        /subscription-status:
+          downstreamCalls:
+          maxLatencyMillis: 500
+        /transfer-status:
+          downstreamCalls:
+          maxLatencyMillis: 500
+    ext-api-gateway:
+      tagSets:
+        - weight: 1
+          tags:
+            transaction.external: true
+            service.version: 1.0.0
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+            pod_count: 10
+            restart:
+              every: 10m
+              jitter: 2m
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            usage:
+              cpu:
+                target: 0.5
+                jitter: 0.5
+              memory:
+                target: 0.6
+                jitter: 0.4
+          resourceAttrs:
+            cloud.provider: gcp
+            cloud.region: us-east-1
+            k8s.node.name: gke-shared-pool-1he3970e-a784
+            k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
+            k8s.replicaset.name: gke-shared-ext-api-gateway-996af458101
+            k8s.replicaset.uid: 125847-1112-3c67-bc45-996af458101
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-2
+            request:
+              cpu: 0.5
+              memory: 2048
+            limit:
+              cpu: 0.75
+              memory: 3072
+            restart:
+              every: 5m
+          resourceAttrs:
+            cloud.provider: gcp
+            cloud.region: us-west-2
+            k8s.node.name: gke-shared-pool-123f9865b99-a983
+            k8s.node.uid: 184e6bac-9784-97ab-32ef-a45dec1070fe
+      routes:
+        /ext-api/checkBlacklist:
+          tagSets:
+            - weight: 1
+              tags:
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.target: ext-api-blacklist
+                transaction.type: API
+          downstreamCalls:
+          maxLatencyMillis: 500
+        /ext-api/checkTransferCompliance:
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.compliance: approved
+                transfer.id: COMP123456
+                transaction.target: ext-api-NRF
+                transaction.type: API
+          downstreamCalls:
+          maxLatencyMillis: 500
+        /ext-api/payment:
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.id: PAY940535356964
+                transaction.target: ext-api-card
+                transaction.type: API
+          downstreamCalls:
+          maxLatencyMillis: 300
+        /ext-api/transferMoney:
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.id: TRF913234567689884
+                transaction.target: ext-api-trnf
+                transaction.type: API
+          downstreamCalls:
+          maxLatencyMillis: 300
+        /ext-api/transferPartner-MorganStanley:
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.id: TRFDDFQFGFHH1217689884
+                transaction.target: ext-api-morganstanley
+                transaction.type: API
+          downstreamCalls:
+          maxLatencyMillis: 100
+        /ext-api/transferSWIFT:
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.id: SWFT913234567689884
+                transaction.target: ext-api-swift
+                transaction.type: API
+          downstreamCalls:
+          maxLatencyMillis: 100
+    IAM:
+      tagSets:
+        - weight: 90
+          flag_set: iam_errors
+          tags:
+            error: true
+            error.message: "CRITICAL: can't access profile"
+            service.version: 3.4.0
+        - weight: 10
+          flag_unset: iam_errors
+          tags:
+            service.version: 3.3.5
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 2
+              memory: 4096
+            limit:
+              cpu: 2
+              memory: 4096
+          resourceAttrs:
+            host.name: IAM-host
+            k8s.node.name: gke-shared-pool-1233970e-abe4
+            k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
+      routes:
+        /getPrivileges:
+          downstreamCalls:
+          maxLatencyMillis: 200
+    loan:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 10.4.214
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+          resourceAttrs:
+            host.name: loan-host
+            k8s.node.name: gke-ebank-pool-9533970e-b6km
+            k8s.node.uid: 008967fd-c08c-9364-47a3-846ced892902
+      routes:
+        /checkBlacklist:
+          tagSets:
+            - weight: 1
+              tags:
+                customer.blacklist: false
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.type: API
+          downstreamCalls:
+            - service: ext-api-gateway
+              route: /ext-api/checkBlacklist
+          maxLatencyMillis: 100
+        /getAgreement:
+          tagSets:
+            - weight: 1
+              tags:
+                ims.transid: LOAG
+                transaction.external: true
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.region: PRD3
+                transaction.target: MAINFRAME
+                transaction.type: IMS
+          downstreamCalls:
+            - service: loan
+              route: /getLoanStatus
+          maxLatencyMillis: 100
+        /getLoanStatus:
+          tagSets:
+            - weight: 99
+              tags:
+                ims.transid: LOST
+                transaction.external: true
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.region: PRD3
+                transaction.target: MAINFRAME
+                transaction.type: IMS
+            - weight: 1
+              tags:
+                error: true
+                error.message: "ERROR: transaction unreachable, retry later"
+                ims.transid: LOST
+                transaction.external: true
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.region: PRD3
+                transaction.target: MAINFRAME
+                transaction.type: IMS
+          downstreamCalls:
+          maxLatencyMillis: 100
+        /getScoring:
+          tagSets:
+            - weight: 1
+              tags:
+                customer.scoring: B
+                transaction.external: true
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.target: ERP
+                transaction.type: TSO
+          downstreamCalls:
+          maxLatencyMillis: 100
+        /requestLoan:
+          downstreamCalls:
+            - service: loan
+              route: /checkBlacklist
+            - service: loan
+              route: /sendScoringInputs
+          maxLatencyMillis: 100
+        /sendLoanInputs:
+          tagSets:
+            - weight: 1
+              tags:
+                ims.transid: LOIN
+                customer.category: AA
+                loan.amount: 100,000
+                loan.type: household
+                loan.category: ATY
+                transaction.external: true
+                transaction.id: LOIN234QDSFFDSG23435
+                transaction.region: PRD3
+                transaction.target: MAINFRAME
+                transaction.type: IMS
+          downstreamCalls:
+            - service: loan
+              route: /getAgreement
+          maxLatencyMillis: 100
+        /sendScoringInputs:
+          downstreamCalls:
+            - service: loan
+              route: /getScoring
+            - service: loan
+              route: /sendLoanInputs
+          maxLatencyMillis: 100
+    payment:
+      tagSets:
+        - weight: 1
+          tags:
+            region: us-east-1
+            service.version: 1.7.7
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: payment-host
+            k8s.node.name: gke-ebank-pool-9533970e-b6km
+            k8s.node.uid: 008967fd-c08c-9364-47a3-846ced892902
+      routes:
+        /ChargeRequest:
+          downstreamCalls:
+            - service: payment
+              route: /CreditCardInfo
+          maxLatencyMillis: 100
+        /CreditCardInfo:
+          tagSets:
+            - weight: 34
+              tags:
+                card.type: AMEX
+            - weight: 33
+              tags:
+                card.type: VISA
+            - weight: 33
+              tags:
+                card.type: MASTERCARD
+          downstreamCalls:
+          maxLatencyMillis: 100
+        /CardPayment:
+          downstreamCalls:
+            - service: payment
+              route: /ChargeRequest
+            - weight: 1
+              service: ext-api-gateway
+              route: /ext-api/payment
+          maxLatencyMillis: 100
+    pingIdentity:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 1.1.0
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-1
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: pingidentity-host
+            k8s.node.name: gke-shared-pool-1233970e-abe4
+            k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
+      routes:
+        /authenticate:
+          downstreamCalls:
+          maxLatencyMillis: 50
+        /detect:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /verify
+          maxLatencyMillis: 50
+        /profile:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /authenticate
+          maxLatencyMillis: 50
+        /verify:
+          downstreamCalls:
+            - service: pingIdentity
+              route: /profile
+          maxLatencyMillis: 50
+    productcatalog:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 5.2
+          tagGenerators:
+            - numTags: 10
+              numVals: 3000
+              valLength: 16
+          inherit:
+            - region
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-2
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: gcp
+            cloud.region: Central-US
+            k8s.node.name: gke-ebank-pool-2487abf-c345
+            k8s.node.uid: 901237ed-ab87-9c64-4713-99c8af9901
+            host.type: t3.medium
+      routes:
+        /getProducts:
+          downstreamCalls:
+          maxLatencyMillis: 100
+          tagSets:
+            - weight: 1
+              inherit:
+                - starter
+        /searchProduct:
+          tagSets:
+            - weight: 15
+              tags:
+                error: true
+                error.message: product not found
+                http.status_code: 503
+            - weight: 85
+              tags:
+          downstreamCalls:
+          maxLatencyMillis: 400
+    recommendation:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 2.3.432
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-2
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: gcp
+            cloud.region: us-west-2
+            k8s.node.name: gke-ebank-pool-2487abf-c345
+            k8s.node.uid: 901237ed-ab87-9c64-4713-99c8af9901
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-3
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            cloud.provider: gcp
+            cloud.region: us-west-1
+            k8s.node.name: gke-ebank-pool-12478ae-3178e
+            k8s.node.uid: 124785a-1287-ac47-4714-91d4778af01
+      routes:
+        /getRecommendations:
+          downstreamCalls:
+            - service: productcatalog
+              route: /getProducts
+          maxLatencyMillis: 200
+    subscription:
+      tagSets:
+        - weight: 1
+          tags:
+            service.version: 1.0.0
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-2
+          resourceAttrs:
+            cloud.provider: gcp
+            cloud.region: us-west-2
+            k8s.node.name: gke-ebank-pool-2487abf-c345
+            k8s.node.uid: 901237ed-ab87-1264-ab99-19c8af975
+      routes:
+        /subscribeProduct:
+          downstreamCalls:
+            - service: productcatalog
+              route: /getProducts
+          maxLatencyMillis: 200
+    transfer-external:
+      tagSets:
+        - weight: 1
+          tags:
+            transfer.type: external
+            service.version: 3.1.1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: transfer-ext-host
+            k8s.node.name: gke-shared-pool-1he3970e-a784
+            k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
+      routes:
+        /checkCompliance:
+          downstreamCalls:
+            - service: ext-api-gateway
+              route: /ext-api/checkTransferCompliance
+          maxLatencyMillis: 100
+        /checkSourceAcctBalance:
+          downstreamCalls:
+            - service: accountbalance
+              route: /getBalance
+          maxLatencyMillis: 100
+        /getTransferStatus:
+          tagSets:
+            - tags:
+                cics.transid: TRST
+                transfer.id: TRFE456789
+                transaction.external: true
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
+          downstreamCalls:
+          maxLatencyMillis: 300
+        /requestTransfer:
+          downstreamCalls:
+            - service: transfer-external
+              route: /checkSourceAcctBalance
+            - service: transfer-external
+              route: /checkCompliance
+            - service: transfer-external
+              route: /transferMoney
+          maxLatencyMillis: 100
+        /transferMoney:
+          tagSets:
+            - weight: 1
+              tags:
+                transfer.destination: BankAzure
+                transfer.id: TRFE456789
+                transaction.external: true
+                transaction.id: 456789
+                transaction.target: ext-api-swift
+                transaction.type: API
+          downstreamCalls:
+            - service: ext-api-gateway
+              route: /ext-api/transferMoney
+            - service: transfer-external
+              route: /getTransferStatus
+          maxLatencyMillis: 300
+    transfer-internal:
+      tagSets:
+        - weight: 1
+          tags:
+            transfer.type: internal
+            service.version: 7.0.1
+      resourceAttrSets:
+        - weight: 1
+          kubernetes:
+            cluster_name: k8s-cluster-6
+            request:
+              cpu: 0.5
+              memory: 512
+            limit:
+              cpu: 1
+              memory: 1024
+          resourceAttrs:
+            host.name: transfer-int-host
+            k8s.node.name: gke-shared-pool-1he3970e-a784
+            k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
+      routes:
+        /checkSourceAcctBalance:
+          downstreamCalls:
+            - service: accountbalance
+              route: /getAccountBalance
+          maxLatencyMillis: 100
+        /getTransferStatus:
+          tagSets:
+            - tags:
+                cics.transid: TRST
+                transfer.id: 123456
+                transaction.external: true
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
+          downstreamCalls:
+          maxLatencyMillis: 300
+        /requestTransfer:
+          downstreamCalls:
+            - service: transfer-internal
+              route: /checkSourceAcctBalance
+            - service: transfer-internal
+              route: /transferMoney
+          maxLatencyMillis: 100
+        /transferMoney:
+          tagSets:
+            - tags:
+                cics.transid: TRNI
+                transfer.id: 123456
+                transaction.external: true
+                transaction.region: PRD1
+                transaction.target: MAINFRAME
+                transaction.type: CICS
+          downstreamCalls:
+            - service: transfer-internal
+              route: /getTransferStatus
+          maxLatencyMillis: 100
+
+flags:
+  # This is a cron-style flag
+    # use https://crontab.guru/
+  - name: iam_errors
+    cron:
+      start: "0,30 * * * *"
+      end: "15,45 * * * *"
+  - name: web_latency
+    cron:
+      start: "0,10,20,30,40,50 * * * *"
+      end: "5,15,25,35,45,55 * * * *"
+  - name: runs_on_azure
+  - name: sev0_total_failure
+  - name: database_outage
+  - name: auth_doom
+    cron:
+      start: "57,12,27,42 * * * *"
+      end: "10,25,40,55 * * * *"
+  # This is an incident-style flag; start and end are relative to incident start
+  - name: auth_doom.phase_1
+    incident:
+      parentFlag: auth_doom
+      start: 0m
+      end: 10m
+  - name: auth_doom.phase_2
+    incident:
+      parentFlag: auth_doom
+      start: 5m
+      # with no duration, lasts until the incident finishes
+  - name: ads_bug
+    cron:
+      start: "0,20,40 * * * *"
+      end: "10,30,50 * * * *"
+  - name: ads_bug.slow
+    incident:
+      parentFlag: ads_bug
+      start: 0m, 7m
+      duration: 3m
+  - name: ads_bug.slower
+    incident:
+      parentFlag: ads_bug
+      start: 3m
+      duration: 4m
+
+rootRoutes:
+  - service: ebank_android
+    route: /login
+    tracesPerHour: 120
+#  - service: ebank_android
+#    route: /make-payment
+#    tracesPerHour: 720
+  - service: ebank_iOS
+    route: /login
+    tracesPerHour: 180
+#  - service: ebank_iOS
+#    route: /make-payment
+#    tracesPerHour: 1200
+  - service: ebank_web
+    route: /login
+    tracesPerHour: 90
+  - service: api-gateway
+    route: /api/getAccountBalance
+    tracesPerHour: 60
+  - service: api-gateway
+    route: /api/getPayment
+    tracesPerHour: 60
+  - service: api-gateway
+    route: /api/requestLoan
+    tracesPerHour: 24
+  - service: api-gateway
+    route: /api/requestTransferExternal
+    tracesPerHour: 24
+  - service: api-gateway
+    route: /api/requestTransferInternal
+    tracesPerHour: 36
+  - service: api-gateway
+    route: /api/searchProduct
+    tracesPerHour: 48
+  - service: api-gateway
+    route: /api/subscribeProduct
+    tracesPerHour: 24
+
+config:
+  kubernetes:
+    pod_count: 1
