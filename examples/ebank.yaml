@@ -176,6 +176,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-east-1
+            k8s.deployment.uid: 275ecb36-5ab8-321a-1234e-123c999b6762
             k8s.node.name: gke-shared-pool-1he3970e-a784
             k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
             k8s.replicaset.name: gke-shared-api-gateway-6d4f58c489
@@ -195,6 +196,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-west-2
+            k8s.deployment.uid: 275ecb36-5ac8-1667-52a11-b23b8799b6773
             k8s.node.name: gke-shared-pool-1233970e-abe4
             k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
             k8s.replicaset.name: gke-shared-api-gateway-123f98750de
@@ -269,6 +271,7 @@ topology:
               memory: 2048
           resourceAttrs:
             host.name: authentication-host
+            k8s.deployment.uid: 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
             k8s.node.name: gke-shared-pool-1233970e-abe4
             k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
             k8s.replicaset.name: gke-shared-authentication-123f9875a99
@@ -305,6 +308,7 @@ topology:
             client.platform: android
             http.method: POST
             instrumentation.name: lightstep
+            k8s.deployment.uid: 275ecb36-5ab8-123c-66477-d8bc999b6771
             k8s.node.name: gke-ebank-pool-9533970e-v3wf
             k8s.node.uid: 182a6f58-4b39-96aa-32ef-f1c7f41066ca
             k8s.replicaset.name: gke-ebank-android-99a34fe456
@@ -370,6 +374,7 @@ topology:
             client.platform: iOS
             http.method: POST
             instrumentation.name: lightstep
+            k8s.deployment.uid: 275ecb36-5ab8-663c-99477-a3Cc969b54ac1
             k8s.node.name: gke-ebank-pool-9643970e-a234
             k8s.node.uid: 177a6f58-4b39-69bc-3201-a745899fe4
             k8s.replicaset.name: gke-ebank-iOS-99a34fe456
@@ -446,6 +451,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-east-1
+            k8s.deployment.uid: 275ecb36-5ad8-54876-61237-9a8c741967ac
             k8s.node.name: gke-ebank-pool-787ae668-ab47e
             k8s.node.uid: bf2c6f77-1239-69aa-32ef-abc7f990c6ca
             k8s.replicaset.name: gke-ebank-web-112ba999456
@@ -563,6 +569,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-east-1
+            k8s.deployment.uid: 275ecb36-5ae8-413a-16757-12749efb5844
             k8s.node.name: gke-shared-pool-1he3970e-a784
             k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
             k8s.replicaset.name: gke-shared-ext-api-gateway-996af458101
