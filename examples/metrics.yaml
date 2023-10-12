@@ -1,0 +1,24 @@
+topology:
+  services:
+    payment:
+      metrics:
+        - name: mq.depth
+          type: Sum
+          max: 100
+          min: 0
+          period: 5m
+          shape: triangle
+        - name: mq.oldestMsgAge
+          type: Sum
+          max: 36000
+          min: 0
+          period: 60m
+          shape: triangle
+    loan:
+      metrics:
+        - name: mq.depth
+          type: Sum
+          max: 20
+          min: 0
+          period: 5m
+          shape: triangle
