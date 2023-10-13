@@ -1,0 +1,33 @@
+receivers:
+  # Generate traces from the given topology file (env var: TOPO_FILE)
+  generator:
+    path: "${TOPO_FILE}"
+    inline: "${TOPO_INLINE}"
+               
+processors:
+  batch:
+
+exporters:
+  logging:
+  # Export to Lightstep Public Satellites
+  otlp:
+    endpoint: "${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT}"
+    tls:
+      insecure_skip_verify: true
+      insecure: "${OTEL_INSECURE}"
+    headers:
+      "lightstep-access-token": "${LS_ACCESS_TOKEN}"
+    sending_queue:
+      num_consumers: 20
+      queue_size: 10000  
+
+service:
+  pipelines:
+    metrics:
+      receivers:
+      - generator
+      processors:
+      - batch
+      exporters:
+      - otlp
+      - logging
