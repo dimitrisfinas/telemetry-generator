@@ -14,6 +14,13 @@ topology:
           min: 0
           period: 5m
           shape: triangle
+          tagGenerator:
+            tags:
+              - mq.queue.name
+              - mq.server
+              - mq.manager
+            numVals: 50
+            valueVariability: 5
         - name: mq.oldestMsgAge
           type: Sum
           max: 36000
