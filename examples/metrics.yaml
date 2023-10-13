@@ -8,29 +8,20 @@ topology:
           min: 0
           period: 5m
           shape: triangle
-          tagGenerator:
-            tags:
-              - mq.queue.name
-              - mq.server
-              - mq.manager
-            numVals: 50
-            valueVariability: 5
+          tags:
+            mq.queue.name: MQ.PAYMENT
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
         - name: mq.oldestMsgAge
           type: Sum
-          max: 36000
+          max: 3600
           min: 0
           period: 60m
           shape: triangle
           tags:
-            mq.queue.name: MQ.LOAN
+            mq.queue.name: MQ.PAYMENT
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
-          resourceAttrSets:
-            - weight: 1 
-              resourceAttrs:
-                instrument.name: lightstep
-                http.method: POST
-                mq.queue.name: MQ.LOAN
     loan:
       metrics:
         - name: mq.depth
@@ -39,3 +30,17 @@ topology:
           min: 0
           period: 5m
           shape: triangle
+          tags:
+            mq.queue.name: MQ.LOAN
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.oldestMsgAge
+          type: Sum
+          max: 60
+          min: 0
+          period: 10m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOAN
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
