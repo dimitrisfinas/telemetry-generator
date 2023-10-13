@@ -1,12 +1,6 @@
 topology:
   services:
     payment:
-      resourceAttrSets:
-        - weight: 1 
-          resourceAttrs:
-            instrument.name: lighstep
-            http.method: POST
-            mq.queue.name: MQ.LOAN
       metrics:
         - name: mq.depth
           type: Sum
@@ -27,6 +21,12 @@ topology:
           min: 0
           period: 60m
           shape: triangle
+          resourceAttrSets:
+            - weight: 1 
+              resourceAttrs:
+                instrument.name: lighstep
+                http.method: POST
+                mq.queue.name: MQ.LOAN
     loan:
       metrics:
         - name: mq.depth
