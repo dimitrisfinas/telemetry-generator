@@ -1,5 +1,92 @@
 topology:
   services:
+
+    loan:
+      metrics:
+        - name: mq.depth
+          type: Sum
+          max: 20
+          min: 0
+          period: 5m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOAN
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.oldestMsgAge
+          type: Sum
+          max: 60
+          min: 0
+          period: 10m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOAN
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.input.count
+          type: Sum
+          max: 5
+          min: 0
+          period: 10m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOAN
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.output.count
+          type: Sum
+          max: 5
+          min: 0
+          period: 10m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOAN
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+
+    logger:
+      metrics:
+        - name: mq.depth
+          type: Sum
+          max: 100
+          min: 0
+          period: 5m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOGGER
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.oldestMsgAge
+          type: Sum
+          max: 10
+          min: 0
+          period: 5m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOGGER
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.input.count
+          type: Sum
+          max: 100
+          min: 0
+          period: 10m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOGGER
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.output.count
+          type: Sum
+          max: 100
+          min: 0
+          period: 10m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOGGER
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+       
     payment:
       metrics:
         - name: mq.depth
@@ -22,25 +109,23 @@ topology:
             mq.queue.name: MQ.PAYMENT
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
-    loan:
-      metrics:
-        - name: mq.depth
+        - name: mq.input.count
           type: Sum
-          max: 20
+          max: 10
           min: 0
           period: 5m
           shape: triangle
           tags:
-            mq.queue.name: MQ.LOAN
+            mq.queue.name: MQ.PAYMENT
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
-        - name: mq.oldestMsgAge
+        - name: mq.output.count
           type: Sum
-          max: 60
+          max: 10
           min: 0
-          period: 10m
+          period: 5m
           shape: triangle
           tags:
-            mq.queue.name: MQ.LOAN
+            mq.queue.name: MQ.PAYMENT
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
