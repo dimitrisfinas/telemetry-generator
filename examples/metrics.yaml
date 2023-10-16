@@ -33,6 +33,16 @@ topology:
             mq.queue.name: MQ.LOAN
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
+        - name: mq.latency.average
+          type: Sum
+          max: 300
+          min: 100
+          period: 10m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOAN
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
         - name: mq.output.count
           type: Sum
           max: 5
@@ -76,6 +86,16 @@ topology:
             mq.queue.name: MQ.LOGGER
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
+        - name: mq.latency.average
+          type: Sum
+          max: 20
+          min: 3
+          period: 1m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOGGER
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
         - name: mq.output.count
           type: Sum
           max: 100
@@ -113,6 +133,16 @@ topology:
           type: Sum
           max: 10
           min: 0
+          period: 5m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.PAYMENT
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.latency.average
+          type: Sum
+          max: 250
+          min: 30
           period: 5m
           shape: triangle
           tags:
