@@ -4,12 +4,12 @@ topology:
     loan:
       metrics:
         - name: mq.depth
-          type: Sum
+          type: Gauge
           max: 20
           min: 0
           period: 5m
           shape: square
-        # const (Sine,	Sawtooth,	Square,	Triangle, Average, Leaking)
+        # const (Sine, Sawtooth,	Square,	Triangle, Average, Leaking)
           tags:
             mq.queue.name: MQ.LOAN
             mq.server: ec2-52-62-125
@@ -25,7 +25,7 @@ topology:
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
         - name: mq.input.count
-          type: Sum
+          type: Gauge
           max: 5
           min: 0
           period: 10m
@@ -39,13 +39,13 @@ topology:
           max: 300
           min: 100
           period: 10m
-          shape: Average
+          shape: Leaking
           tags:
             mq.queue.name: MQ.LOAN
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
         - name: mq.output.count
-          type: Sum
+          type: Gauge
           max: 5
           min: 0
           period: 10m
@@ -58,7 +58,7 @@ topology:
     logger:
       metrics:
         - name: mq.depth
-          type: Sum
+          type: Gauge
           max: 100
           min: 0
           period: 5m
@@ -78,7 +78,7 @@ topology:
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
         - name: mq.input.count
-          type: Sum
+          type: Gauge
           max: 100
           min: 0
           period: 10m
@@ -98,7 +98,7 @@ topology:
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
         - name: mq.output.count
-          type: Sum
+          type: Gauge
           max: 100
           min: 0
           period: 10m
@@ -111,7 +111,7 @@ topology:
     payment:
       metrics:
         - name: mq.depth
-          type: Sum
+          type: Gauge
           max: 100
           min: 0
           period: 5m
@@ -131,7 +131,7 @@ topology:
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
         - name: mq.input.count
-          type: Sum
+          type: Gauge
           max: 10
           min: 0
           period: 5m
@@ -145,13 +145,13 @@ topology:
           max: 250
           min: 30
           period: 5m
-          shape: average
+          shape: sine
           tags:
             mq.queue.name: MQ.PAYMENT
             mq.server: ec2-52-62-125
             mq.manager: TCPQM
         - name: mq.output.count
-          type: Sum
+          type: Gauge
           max: 10
           min: 0
           period: 5m
