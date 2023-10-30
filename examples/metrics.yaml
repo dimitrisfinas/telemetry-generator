@@ -8,7 +8,8 @@ topology:
           max: 20
           min: 0
           period: 5m
-          shape: triangle
+          shape: square
+        # const (Sine,	Sawtooth,	Square,	Triangle, Average, Leaking)
           tags:
             mq.queue.name: MQ.LOAN
             mq.server: ec2-52-62-125
@@ -18,7 +19,7 @@ topology:
           max: 60
           min: 0
           period: 10m
-          shape: triangle
+          shape: Sawtooth
           tags:
             mq.queue.name: MQ.LOAN
             mq.server: ec2-52-62-125
@@ -28,7 +29,7 @@ topology:
           max: 5
           min: 0
           period: 10m
-          shape: triangle
+          shape: square
           tags:
             mq.queue.name: MQ.LOAN
             mq.server: ec2-52-62-125
@@ -38,7 +39,7 @@ topology:
           max: 300
           min: 100
           period: 10m
-          shape: triangle
+          shape: Average
           tags:
             mq.queue.name: MQ.LOAN
             mq.server: ec2-52-62-125
@@ -48,7 +49,7 @@ topology:
           max: 5
           min: 0
           period: 10m
-          shape: triangle
+          shape: square
           tags:
             mq.queue.name: MQ.LOAN
             mq.server: ec2-52-62-125
@@ -61,7 +62,7 @@ topology:
           max: 100
           min: 0
           period: 5m
-          shape: triangle
+          shape: square
           tags:
             mq.queue.name: MQ.LOGGER
             mq.server: ec2-52-62-125
@@ -71,7 +72,7 @@ topology:
           max: 10
           min: 0
           period: 5m
-          shape: triangle
+          shape: Sawtooth
           tags:
             mq.queue.name: MQ.LOGGER
             mq.server: ec2-52-62-125
@@ -81,7 +82,7 @@ topology:
           max: 100
           min: 0
           period: 10m
-          shape: triangle
+          shape: square
           tags:
             mq.queue.name: MQ.LOGGER
             mq.server: ec2-52-62-125
@@ -101,7 +102,7 @@ topology:
           max: 100
           min: 0
           period: 10m
-          shape: triangle
+          shape: square
           tags:
             mq.queue.name: MQ.LOGGER
             mq.server: ec2-52-62-125
@@ -114,7 +115,7 @@ topology:
           max: 100
           min: 0
           period: 5m
-          shape: triangle
+          shape: square
           tags:
             mq.queue.name: MQ.PAYMENT
             mq.server: ec2-52-62-125
@@ -134,7 +135,7 @@ topology:
           max: 10
           min: 0
           period: 5m
-          shape: triangle
+          shape: square
           tags:
             mq.queue.name: MQ.PAYMENT
             mq.server: ec2-52-62-125
@@ -144,7 +145,7 @@ topology:
           max: 250
           min: 30
           period: 5m
-          shape: triangle
+          shape: average
           tags:
             mq.queue.name: MQ.PAYMENT
             mq.server: ec2-52-62-125
@@ -154,7 +155,7 @@ topology:
           max: 10
           min: 0
           period: 5m
-          shape: triangle
+          shape: square
           tags:
             mq.queue.name: MQ.PAYMENT
             mq.server: ec2-52-62-125
