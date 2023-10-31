@@ -93,11 +93,21 @@ topology:
           max: 100
           min: 0
           period: 5m
-          shape: square
+          shape: Leaking
           tags:
             mq.queue.name: MQ.LOGGER
-            mq.server: ec2-52-62-125
-            mq.manager: TCPQM
+            mq.server: ec2-52-62-126
+            mq.manager: TCPQM2
+        - name: mq.depth.latest
+          type: Gauge
+          max: 10
+          min: 0
+          period: 3m
+          shape: Square
+          tags:
+            mq.queue.name: MQ.LOGGER
+            mq.server: ec2-52-62-126
+            mq.manager: TCPQM2
         - name: mq.oldestMsgAge
           type: Sum
           max: 10
@@ -106,18 +116,28 @@ topology:
           shape: Sawtooth
           tags:
             mq.queue.name: MQ.LOGGER
-            mq.server: ec2-52-62-125
-            mq.manager: TCPQM
+            mq.server: ec2-52-62-126
+            mq.manager: TCPQM2
         - name: mq.input.count
           type: Sum
           max: 100
           min: 0
           period: 10m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOGGER
+            mq.server: ec2-52-62-126
+            mq.manager: TCPQM2
+        - name: mq.input.count.latest
+          type: Gauge
+          max: 10
+          min: 0
+          period: 1m
           shape: square
           tags:
             mq.queue.name: MQ.LOGGER
-            mq.server: ec2-52-62-125
-            mq.manager: TCPQM
+            mq.server: ec2-52-62-126
+            mq.manager: TCPQM2
         - name: mq.latency.average
           type: Sum
           max: 20
@@ -126,19 +146,29 @@ topology:
           shape: triangle
           tags:
             mq.queue.name: MQ.LOGGER
-            mq.server: ec2-52-62-125
-            mq.manager: TCPQM
+            mq.server: ec2-52-62-126
+            mq.manager: TCPQM2
         - name: mq.output.count
           type: Sum
           max: 100
           min: 0
           period: 10m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.LOGGER
+            mq.server: ec2-52-62-126
+            mq.manager: TCPQM2
+        - name: mq.output.count.latest
+          type: Gauge
+          max: 10
+          min: 0
+          period: 1m
           shape: square
           tags:
             mq.queue.name: MQ.LOGGER
-            mq.server: ec2-52-62-125
-            mq.manager: TCPQM
-       
+            mq.server: ec2-52-62-126
+            mq.manager: TCPQM2
+
     payment:
       metrics:
         - name: mq.depth
@@ -146,6 +176,26 @@ topology:
           max: 100
           min: 0
           period: 5m
+          shape: square
+          tags:
+            mq.queue.name: MQ.PAYMENT
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.depth.latest
+          type: Gauge
+          max: 10
+          min: 0
+          period: 5m
+          shape: square
+          tags:
+            mq.queue.name: MQ.PAYMENT
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.depth.latest
+          type: Gauge
+          max: 3
+          min: 1
+          period: 75s
           shape: square
           tags:
             mq.queue.name: MQ.PAYMENT
@@ -166,6 +216,16 @@ topology:
           max: 10
           min: 0
           period: 5m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.PAYMENT
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.input.count.latest
+          type: Gauge
+          max: 10
+          min: 0
+          period: 5m
           shape: square
           tags:
             mq.queue.name: MQ.PAYMENT
@@ -183,6 +243,16 @@ topology:
             mq.manager: TCPQM
         - name: mq.output.count
           type: Sum
+          max: 10
+          min: 0
+          period: 5m
+          shape: triangle
+          tags:
+            mq.queue.name: MQ.PAYMENT
+            mq.server: ec2-52-62-125
+            mq.manager: TCPQM
+        - name: mq.output.count.latest
+          type: Gauge
           max: 10
           min: 0
           period: 5m
