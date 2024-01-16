@@ -54,3 +54,16 @@ Don't forget to build the project the first time without
 opentelemetry-collector-builder --config config/builder-config.yml
 ```
 (this will take several minutes to run)
+
+# Running your command
+
+
+# Running your command in background
+```shell
+nohup command >/dev/null 2>&1 &
+```
+
+example:
+```shell
+nohup ./git/telemetry-generator/build/telemetry-generator --config $CONFIG_FILE >/dev/null 2>&1 &
+```
