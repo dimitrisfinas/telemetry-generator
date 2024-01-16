@@ -31,6 +31,7 @@ topology:
               memory: 1024
           resourceAttrs:
             host.name: accountbalance-host
+            k8s.cluster.uid: 911af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-ebank-pool-9533970e-b6km
             k8s.node.uid: 008967fd-c08c-9364-47a3-846ced892902
       routes:
@@ -113,6 +114,7 @@ topology:
               memory: 1024
           resourceAttrs:
             host.name: ads-host
+            k8s.cluster.uid: 911af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-ebank-pool-9533970e-v3wf
             k8s.node.uid: 182a6f58-4b39-96aa-32ef-f1c7f41066ca
       routes:
@@ -176,6 +178,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-east-1
+            k8s.cluster.uid: 966af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.deployment.uid: 275ecb36-5ab8-321a-1234e-123c999b6762
             k8s.node.name: gke-shared-pool-1he3970e-a784
             k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
@@ -196,6 +199,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-west-2
+            k8s.cluster.uid: 911af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.deployment.uid: 275ecb36-5ac8-1667-52a11-b23b8799b6773
             k8s.node.name: gke-shared-pool-1233970e-abe4
             k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
@@ -271,6 +275,7 @@ topology:
               memory: 2048
           resourceAttrs:
             host.name: authentication-host
+            k8s.cluster.uid: 911af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.deployment.uid: 275ecb36-5aa8-4c2a-9c47-d8bb681b9aff
             k8s.node.name: gke-shared-pool-1233970e-abe4
             k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
@@ -308,6 +313,7 @@ topology:
             client.platform: android
             http.method: POST
             instrumentation.name: lightstep
+            k8s.cluster.uid: 911af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.deployment.uid: 275ecb36-5ab8-123c-66477-d8bc999b6771
             k8s.node.name: gke-ebank-pool-9533970e-v3wf
             k8s.node.uid: 182a6f58-4b39-96aa-32ef-f1c7f41066ca
@@ -374,6 +380,7 @@ topology:
             client.platform: iOS
             http.method: POST
             instrumentation.name: lightstep
+            k8s.cluster.uid: 911af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.deployment.uid: 275ecb36-5ab8-663c-99477-a3Cc969b54ac1
             k8s.node.name: gke-ebank-pool-9643970e-a234
             k8s.node.uid: 177a6f58-4b39-69bc-3201-a745899fe4
@@ -451,6 +458,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-east-1
+            k8s.cluster.uid: 911af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.deployment.uid: 275ecb36-5ad8-54876-61237-9a8c741967ac
             k8s.node.name: gke-ebank-pool-787ae668-ab47e
             k8s.node.uid: bf2c6f77-1239-69aa-32ef-abc7f990c6ca
@@ -569,6 +577,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-east-1
+            k8s.cluster.uid: 966af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.deployment.uid: 275ecb36-5ae8-413a-16757-12749efb5844
             k8s.node.name: gke-shared-pool-1he3970e-a784
             k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
@@ -588,6 +597,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-west-2
+            k8s.cluster.uid: 922af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-shared-pool-123f9865b99-a983
             k8s.node.uid: 184e6bac-9784-97ab-32ef-a45dec1070fe
       routes:
@@ -672,6 +682,7 @@ topology:
               memory: 4096
           resourceAttrs:
             host.name: IAM-host
+            k8s.cluster.uid: 911af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-shared-pool-1233970e-abe4
             k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
       routes:
@@ -690,6 +701,7 @@ topology:
             cluster_name: k8s-cluster-6
           resourceAttrs:
             host.name: loan-host
+            k8s.cluster.uid: 966af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-ebank-pool-9533970e-b6km
             k8s.node.uid: 008967fd-c08c-9364-47a3-846ced892902
       routes:
@@ -802,6 +814,7 @@ topology:
               memory: 1024
           resourceAttrs:
             host.name: payment-host
+            k8s.cluster.uid: 966af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-ebank-pool-9533970e-b6km
             k8s.node.uid: 008967fd-c08c-9364-47a3-846ced892902
       routes:
@@ -849,6 +862,7 @@ topology:
               memory: 1024
           resourceAttrs:
             host.name: pingidentity-host
+            k8s.cluster.uid: 911af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-shared-pool-1233970e-abe4
             k8s.node.uid: 182e6b58-1234-96aa-32ef-f1c7f41066ca
       routes:
@@ -895,6 +909,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: Central-US
+            k8s.cluster.uid: 922af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-ebank-pool-2487abf-c345
             k8s.node.uid: 901237ed-ab87-9c64-4713-99c8af9901
             host.type: t3.medium
@@ -936,6 +951,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-west-2
+            k8s.cluster.uid: 922af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-ebank-pool-2487abf-c345
             k8s.node.uid: 901237ed-ab87-9c64-4713-99c8af9901
         - weight: 1
@@ -950,6 +966,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-west-1
+            k8s.cluster.uid: 933af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-ebank-pool-12478ae-3178e
             k8s.node.uid: 124785a-1287-ac47-4714-91d4778af01
       routes:
@@ -971,6 +988,7 @@ topology:
           resourceAttrs:
             cloud.provider: gcp
             cloud.region: us-west-2
+            k8s.cluster.uid: 922af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-ebank-pool-2487abf-c345
             k8s.node.uid: 901237ed-ab87-1264-ab99-19c8af975
       routes:
@@ -998,6 +1016,7 @@ topology:
               memory: 1024
           resourceAttrs:
             host.name: transfer-ext-host
+            k8s.cluster.uid: 966af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-shared-pool-1he3970e-a784
             k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
       routes:
@@ -1066,6 +1085,7 @@ topology:
               memory: 1024
           resourceAttrs:
             host.name: transfer-int-host
+            k8s.cluster.uid: 966af50a-31a0-410b-a4a5-7f11c3cb3bea
             k8s.node.name: gke-shared-pool-1he3970e-a784
             k8s.node.uid: 183e6bac-1789-96ab-32ef-a45dec1069ca
       routes:
